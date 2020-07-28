@@ -5,13 +5,14 @@ interface ContainerProps {
   isFocused: boolean;
   isFilled: boolean;
   isErrored: boolean;
+  haveIcon: boolean;
 }
 
 export const Container = styled.div<ContainerProps>`
   background: #F9F9F9;
   border-radius: 16px;
   padding: 16px;
-  width: 100%;
+  width: 294px;
 
   box-shadow: 5px 4px 10px rgba(22, 33, 39, 0.25);
   color: #929292;
@@ -43,7 +44,12 @@ export const Container = styled.div<ContainerProps>`
 
   input {
     flex: 1;
-    max-width: 190px;
+    ${(props) =>
+      props.haveIcon &&
+      css`
+        max-width: 190px;
+      `}
+
     background: transparent;
     border: 0;
     color: #4F4F4F;
