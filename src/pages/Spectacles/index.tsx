@@ -3,7 +3,7 @@ import React from 'react';
 import { Container, Content } from './styles';
 import SideMenu from '../../components/SideMenu';
 
-const Dashboard: React.FC = () => {
+const Spectacles: React.FC = () => {
   return (
     <Container>
       <SideMenu />
@@ -13,4 +13,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default Spectacles;

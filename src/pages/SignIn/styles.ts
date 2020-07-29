@@ -1,7 +1,38 @@
 import styled, { keyframes } from 'styled-components';
 import { shade } from 'polished';
 
-import signInImage from '../../assets/signin-image.png';
+const girlAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(120px);
+  } to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+`;
+
+const familyAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  } to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+`;
+
+const formAnimation = keyframes`
+0% {
+  opacity: 0;
+  transform: scale(0.2);
+} 70% {
+  opacity: 0.8;
+  transform: scale(1.1);
+} 100% {
+  opacity: 1;
+  transform: scale(1);
+}
+`;
 
 export const Container = styled.main`
   padding: 16px;
@@ -11,19 +42,6 @@ export const Container = styled.main`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const formAnimation = keyframes`
-  0% {
-    opacity: 0;
-    transform: scale(0.2);
-  } 70% {
-    opacity: 0.8;
-    transform: scale(1.1);
-  } 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
 `;
 
 export const Content = styled.div`
@@ -52,7 +70,7 @@ export const Content = styled.div`
     margin-left: 72px;
     max-width: 294px;
 
-    animation: ${formAnimation} 1s ease-in-out;
+    /* animation: ${formAnimation} 1s ease-in-out; */
 
     h1 {
       font-size: 54px;
@@ -101,14 +119,32 @@ export const SignUp = styled.div`
 
 export const SideBackground = styled.div`
   flex: 1;
-  background: url(${signInImage}) no-repeat;
-  background-position: 110px 264px;
-
-  @media (max-width: 1125px) {
-    background-position: 80px 264px;
-  }
+  position: relative;
 
   @media (max-width: 1050px) {
     display: none;
+  }
+
+  img {
+    position: absolute;
+  }
+
+  .blueBackground {
+    top: 290px;
+    left: 110px;
+  }
+
+  .girl {
+    top: 409px;
+    left: 196px;
+
+    animation: ${girlAnimation} 1s;
+  }
+
+  .familySkating {
+    top: 244px;
+    left: 328px;
+
+    animation: ${familyAnimation} 1s;
   }
 `;

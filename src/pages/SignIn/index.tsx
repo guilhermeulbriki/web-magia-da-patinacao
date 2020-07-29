@@ -12,6 +12,9 @@ import { Container, Content, SignUp, SideBackground } from './styles';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import logo from '../../assets/logo.svg';
+import girl from '../../assets/girl.png';
+import blueBackground from '../../assets/blue-background.png';
+import familySkating from '../../assets/family-skating.png';
 
 interface SignInData {
   email: string;
@@ -88,7 +91,19 @@ const SignIn: React.FC = () => {
           </SignUp>
         </Form>
 
-        <SideBackground />
+        <SideBackground>
+          <img
+            src={blueBackground}
+            alt="blueBackground"
+            className="blueBackground"
+          />
+          <img src={girl} alt="girl" className="girl" />
+          <img
+            src={familySkating}
+            alt="familySkating"
+            className="familySkating"
+          />
+        </SideBackground>
       </Content>
     </Container>
   );
