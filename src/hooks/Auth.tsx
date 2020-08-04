@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useState, useContext } from 'react';
+import { decode } from 'jsonwebtoken';
 import api from '../services/api';
 
 interface Admin {
@@ -24,6 +25,12 @@ interface AuthState {
   admin: Admin;
 }
 
+interface IToken {
+  payload: {
+    exp: number;
+  };
+}
+
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC = ({ children }) => {
@@ -32,9 +39,16 @@ export const AuthProvider: React.FC = ({ children }) => {
     const admin = localStorage.getItem('@MagiaPatinacao:admin');
 
     if (token && admin) {
-      api.defaults.headers.authorization = `Bearer ${token}`;
+      const currentDate = new Date();
+      const decodedToken = decode(token, { complete: true });
 
-      return { token, admin: JSON.parse(admin) };
+      const { payload } = decodedToken as IToken;
+
+      if (payload.exp > currentDate.getTime()) {
+        api.defaults.headers.authorization = `Bearer ${token}`;
+
+        return { token, admin: JSON.parse(admin) };
+      }
     }
 
     return {} as AuthState;

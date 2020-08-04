@@ -13,8 +13,10 @@ import groups from '../../assets/menu/groups.svg';
 import competitions from '../../assets/menu/competitions.svg';
 import spectacles from '../../assets/menu/megaphone.svg';
 import directors from '../../assets/menu/directors.svg';
+import { useAuth } from '../../hooks/Auth';
 
 const SideMenu: React.FC = () => {
+  const { admin } = useAuth();
   const location = useLocation();
 
   return (
@@ -22,7 +24,7 @@ const SideMenu: React.FC = () => {
       <Profile>
         <section>
           <span>Bem vindo,</span>
-          <strong>Guilherme Ulbriki</strong>
+          <strong>{admin.name}</strong>
         </section>
 
         <img src={manAvatar} alt="avatar" />
@@ -30,73 +32,73 @@ const SideMenu: React.FC = () => {
 
       <Content>
         <div className={location.pathname === '/dashboard' ? 'active' : ''}>
-          <span>
+          <Link to="/dashboard">
             <img src={dashboard} alt="dashboard" />
-            <Link to="/dashboard">Dashboard</Link>
-          </span>
+            <span>Dashboard</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/enrollments' ? 'active' : ''}>
-          <span>
+          <Link to="/enrollments">
             <img src={enrollments} alt="enrollments" />
-            <Link to="/enrollments">Associados, matrículas e desistências</Link>
-          </span>
+            <span>Associados, matrículas e desistências</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/students' ? 'active' : ''}>
-          <span>
+          <Link to="/students">
             <img src={students} alt="students" />
-            <Link to="/students">Alunos</Link>
-          </span>
+            <span>Alunos</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/groups' ? 'active' : ''}>
-          <span>
+          <Link to="/groups">
             <img src={groups} alt="groups" />
-            <Link to="/groups">Turmas</Link>
-          </span>
+            <span>Turmas</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/competitions' ? 'active' : ''}>
-          <span>
+          <Link to="/competitions">
             <img src={competitions} alt="competitions" />
-            <Link to="/competitions">Competições</Link>
-          </span>
+            <span>Competições</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/spectacles' ? 'active' : ''}>
-          <span>
+          <Link to="/spectacles">
             <img src={spectacles} alt="spectacles" />
-            <Link to="/spectacles">Shows</Link>
-          </span>
+            <span>Shows</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/directors' ? 'active' : ''}>
-          <span>
+          <Link to="/directors">
             <img src={directors} alt="directors" />
-            <Link to="/directors">Diretorias</Link>
-          </span>
+            <span>Diretorias</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>
 
         <div className={location.pathname === '/register' ? 'active' : ''}>
-          <span>
+          <Link to="/register">
             <img src={directors} alt="create-director" />
-            <Link to="/register">Cadastrar administrador</Link>
-          </span>
+            <span>Cadastrar administrador</span>
+          </Link>
 
           <img src={pointer} alt="pointer" />
         </div>

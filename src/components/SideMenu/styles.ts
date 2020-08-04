@@ -69,9 +69,10 @@ export const Content = styled.div`
     align-items: center;
     justify-content: space-between;
 
-    span {
+    a {
       height: 37px;
       width: 172px;
+      text-decoration: none;
 
       display: flex;
       cursor: pointer;
@@ -81,16 +82,15 @@ export const Content = styled.div`
         margin-right: 12px;
       }
 
-      a {
+      span {
         font-size: 12px;
         color: #005678;
         font-weight: 600;
-        text-decoration: none;
 
         transition: color 0.2s;
       }
 
-      &:hover a {
+      &:hover span {
         color: ${lighten(0.2, '#005678')};
       }
     }
