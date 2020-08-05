@@ -39,12 +39,14 @@ export const AuthProvider: React.FC = ({ children }) => {
     const admin = localStorage.getItem('@MagiaPatinacao:admin');
 
     if (token && admin) {
-      const currentDate = new Date();
+      const currentDate = new Date().getTime();
       const decodedToken = decode(token, { complete: true });
 
       const { payload } = decodedToken as IToken;
 
-      if (payload.exp > currentDate.getTime()) {
+      const exp = `${payload.exp}000`;
+
+      if (Number(exp) > currentDate) {
         api.defaults.headers.authorization = `Bearer ${token}`;
 
         return { token, admin: JSON.parse(admin) };

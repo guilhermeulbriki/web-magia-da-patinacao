@@ -1,8 +1,10 @@
 import React from 'react';
 
 import { Link, useLocation } from 'react-router-dom';
-import { Container, Profile, Content } from './styles';
+import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
+import { useAuth } from '../../hooks/Auth';
 
+import { Container, Profile, Content } from './styles';
 import logo from '../../assets/logo.svg';
 import pointer from '../../assets/pointer.svg';
 import manAvatar from '../../assets/man-avatar.png';
@@ -13,7 +15,6 @@ import groups from '../../assets/menu/groups.svg';
 import competitions from '../../assets/menu/competitions.svg';
 import spectacles from '../../assets/menu/megaphone.svg';
 import directors from '../../assets/menu/directors.svg';
-import { useAuth } from '../../hooks/Auth';
 
 const SideMenu: React.FC = () => {
   const { admin } = useAuth();
@@ -24,7 +25,7 @@ const SideMenu: React.FC = () => {
       <Profile>
         <section>
           <span>Bem vindo,</span>
-          <strong>{admin.name}</strong>
+          <strong>{putFirstLetterUperCase(admin.name)}</strong>
         </section>
 
         <img src={manAvatar} alt="avatar" />

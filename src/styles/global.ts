@@ -1,4 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
+import { linearGradient } from 'polished';
 
 export default createGlobalStyle`
   * {
@@ -9,7 +10,10 @@ export default createGlobalStyle`
   }
 
   body {
-    background: #EAEAEA;
+    background: ${linearGradient({
+      colorStops: ['#F2F2F2', '#E2E2E2'],
+      toDirection: 'to bottom right',
+    })};
     color: #00111F;
     -webkit-font-smoothing: antialiased;
   }

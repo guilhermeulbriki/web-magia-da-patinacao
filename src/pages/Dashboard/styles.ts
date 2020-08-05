@@ -1,5 +1,4 @@
 import styled, { keyframes } from 'styled-components';
-import { linearGradient } from 'polished';
 
 export const Container = styled.div`
   width: 100%;
@@ -13,20 +12,16 @@ export const Container = styled.div`
 export const Content = styled.div`
   flex: 1;
   padding: 32px 16px 32px 32px;
-  background: ${linearGradient({
-    colorStops: ['#F2F2F2', '#E2E2E2'],
-    toDirection: 'to bottom right',
-  })};
 `;
 
 const rotateGraphic = keyframes`
-from {
-  opacity: 0;
-  transform: rotate(-65deg);
-} to {
-  opacity: 1;
-  transform: rotate(0deg);
-}
+  from {
+    opacity: 0;
+    transform: rotate(-65deg);
+  } to {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
 `;
 
 export const PieGraphs = styled.section`
@@ -40,11 +35,11 @@ export const PieGraphs = styled.section`
 `;
 
 export const Graph = styled.article`
-  min-width: 410px;
+  min-width: 380px;
 
   strong {
     color: #00111f;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
   }
 
@@ -58,6 +53,9 @@ export const Graph = styled.article`
     margin-top: 16px;
     max-height: 240px;
     padding: 24px;
+    cursor: pointer;
+
+    transition: 0.3s;
 
     main {
       height: 100%;
@@ -68,15 +66,28 @@ export const Graph = styled.article`
 
       animation: ${rotateGraphic} 1.5s;
     }
+
+    &:hover {
+      box-shadow: 0px 0px 10px #ccc;
+      transform: scale(1.1);
+    }
   }
 `;
 
 export const Legend = styled.ul`
   margin-left: 24px;
   padding-right: 8px;
-  list-style: none;
   max-height: 200px;
+  list-style: none;
   overflow-y: scroll;
+
+  &.enrollment {
+    min-width: 125px;
+  }
+
+  &.age {
+    min-width: 100px;
+  }
 
   ::-webkit-scrollbar {
     width: 4px;

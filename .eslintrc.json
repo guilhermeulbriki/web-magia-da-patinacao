@@ -42,6 +42,7 @@
     "import/no-duplicates": "off",
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/camelcase": "off",
+    "no-plusplus": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {

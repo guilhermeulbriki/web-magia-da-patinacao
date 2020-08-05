@@ -1,21 +1,74 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { VictoryPie } from 'victory';
 import { GiPlainCircle } from 'react-icons/gi';
 
 import { Container, Content, Graph, Legend, PieGraphs } from './styles';
 import SideMenu from '../../components/SideMenu';
 import api from '../../services/api';
+import getPorcentage from '../../utils/getPorcentage';
+
+interface IDataGraph {
+  value: number;
+  porcentage: number;
+}
+
+interface Enrollment {
+  created_at: Date;
+  updated_at: Date;
+}
 
 const Dashboard: React.FC = () => {
-  useEffect(() => {
-    api.get('/enrollments').then((response) => {
-      console.log(response.data);
-    });
-
-    api.get('/students/1').then((response) => {
-      console.log(response.data);
-    });
+  const [enrollments, setEnrollments] = useState<IDataGraph>({
+    value: 10,
+    porcentage: 33,
   });
+  const [updatedEnrollments, setUpdatedEnrollments] = useState<IDataGraph>({
+    value: 10,
+    porcentage: 33,
+  });
+  const [shutdowns, setShutdowns] = useState<IDataGraph>({
+    value: 10,
+    porcentage: 33,
+  });
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    async function loadData() {
+      const responseEnrollment = await api.get<Enrollment[]>('/enrollments');
+      const responseShutdown = await api.get('/shutdowns');
+
+      let totalEnrollments = 0;
+      let totalUpdatedEnrollments = 0;
+      let total = 0;
+
+      responseEnrollment.data.forEach((enrollment) => {
+        if (enrollment.created_at === enrollment.updated_at) {
+          totalEnrollments += 1;
+        } else {
+          totalUpdatedEnrollments += 1;
+        }
+      });
+
+      total = responseEnrollment.data.length + responseShutdown.data.length;
+
+      setEnrollments({
+        porcentage: getPorcentage(total, totalEnrollments),
+        value: totalEnrollments,
+      });
+
+      setUpdatedEnrollments({
+        porcentage: getPorcentage(total, totalUpdatedEnrollments),
+        value: totalUpdatedEnrollments,
+      });
+
+      setShutdowns({
+        porcentage: getPorcentage(total, responseShutdown.data.length),
+        value: responseShutdown.data.length,
+      });
+    }
+
+    loadData();
+  }, []);
 
   return (
     <Container>
@@ -32,9 +85,18 @@ const Dashboard: React.FC = () => {
               <main>
                 <VictoryPie
                   data={[
-                    { x: '192', y: 27 },
-                    { x: '232', y: 33 },
-                    { x: '292', y: 40 },
+                    {
+                      x: `${shutdowns.value}`,
+                      y: Number(`${shutdowns.porcentage}`),
+                    },
+                    {
+                      x: `${enrollments.value}`,
+                      y: Number(`${enrollments.porcentage}`),
+                    },
+                    {
+                      x: `${updatedEnrollments.value}`,
+                      y: Number(`${updatedEnrollments.porcentage}`),
+                    },
                   ]}
                   style={{
                     labels: {
@@ -47,7 +109,7 @@ const Dashboard: React.FC = () => {
                 />
               </main>
 
-              <Legend>
+              <Legend className="enrollment">
                 <li>
                   <GiPlainCircle color="#299503" />
                   <span>Matrículas</span>
@@ -86,7 +148,7 @@ const Dashboard: React.FC = () => {
                 />
               </main>
 
-              <Legend>
+              <Legend className="age">
                 <li>
                   <GiPlainCircle color="#1F4A6E" />
                   <span>18 anos</span>
