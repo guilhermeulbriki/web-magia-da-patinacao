@@ -13,6 +13,7 @@ import Competitions from '../pages/Competitions';
 import Spectacles from '../pages/Spectacles';
 import Directors from '../pages/Directors';
 import Register from '../pages/Register';
+import Profile from '../pages/Profile';
 
 const Routes: React.FC = () => (
   <Switch>
@@ -20,6 +21,7 @@ const Routes: React.FC = () => (
     <Route path="/signup" exact component={SignUp} />
 
     <Route path="/dashboard" component={Dashboard} isPrivate />
+    <Route path="/profile" component={Profile} isPrivate />
     <Route path="/enrollments" component={Enrollments} isPrivate />
     <Route path="/students" component={Students} isPrivate />
     <Route path="/groups" component={Groups} isPrivate />

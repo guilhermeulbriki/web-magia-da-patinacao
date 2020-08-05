@@ -54,6 +54,14 @@ export const Profile = styled.div`
       font-weight: 700;
     }
   }
+
+  img {
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
 `;
 
 export const Content = styled.div`

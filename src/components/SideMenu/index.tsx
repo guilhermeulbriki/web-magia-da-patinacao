@@ -28,7 +28,9 @@ const SideMenu: React.FC = () => {
           <strong>{putFirstLetterUperCase(admin.name)}</strong>
         </section>
 
-        <img src={manAvatar} alt="avatar" />
+        <Link to="/profile">
+          <img src={manAvatar} alt="avatar" />
+        </Link>
       </Profile>
 
       <Content>
