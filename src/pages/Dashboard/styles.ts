@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 export const Container = styled.div`
   width: 100%;
@@ -23,6 +23,14 @@ export const PieGraphs = styled.section`
   }
 `;
 
+const pieGraphAnimation = keyframes`
+  from {
+    transform: rotate(150deg);
+  } to {
+    transform: rotate(0deg);
+  }
+`;
+
 export const PieGraph = styled.article`
   min-width: 380px;
 
@@ -42,6 +50,10 @@ export const PieGraph = styled.article`
     padding: 24px;
     cursor: pointer;
     transition: 0.3s;
+
+    > div div svg g g path {
+      animation: ${pieGraphAnimation} 1.3s;
+    }
 
     &:hover {
       box-shadow: 0px 0px 10px #ccc;
