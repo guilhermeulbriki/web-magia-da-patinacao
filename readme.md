@@ -23,9 +23,10 @@
 This project was developed with the following technologies:
 
 -  [ReactJS](https://reactjs.org/)
+-  [TypeScript](https://www.typescriptlang.org/)
 -  [styled-components](https://www.styled-components.com/)
 -  [react-icons](https://react-icons.github.io/react-icons/)
--  [victory](https://formidable.com/open-source/victory/)
+-  [Nivo](https://nivo.rocks/)
 -  [yup](https://github.com/jquense/yup)
 
 ## :information_source: How To Use
