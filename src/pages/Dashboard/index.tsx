@@ -1,14 +1,13 @@
 /* eslint-disable no-param-reassign */
 import React, { useEffect, useState } from 'react';
-import { VictoryPie, VictoryBar, VictoryTheme, VictoryChart } from 'victory';
-import { GiPlainCircle } from 'react-icons/gi';
+import { BounceLoader } from 'react-spinners';
+import { ResponsiveBar } from '@nivo/bar';
+import { ResponsivePie } from '@nivo/pie';
 
 import {
   Container,
   Content,
-  EnrollmentGraph,
-  AgeGraph,
-  Legend,
+  PieGraph,
   PieGraphs,
   BarGraphContent,
   BarGraph,
@@ -16,11 +15,6 @@ import {
 import SideMenu from '../../components/SideMenu';
 import api from '../../services/api';
 import getPorcentage from '../../utils/getPorcentage';
-
-interface IDataGraph {
-  value: number;
-  porcentage: number;
-}
 
 interface IDataGraphAges {
   value: number;
@@ -33,6 +27,12 @@ interface Enrollment {
   updated_at: Date;
 }
 
+interface IEnrollmentsGraph {
+  enrollments: number;
+  newEnrollments: number;
+  shutdowns: number;
+}
+
 interface StudentsAgeDTO {
   age: number;
 }
@@ -43,32 +43,11 @@ interface IGroups {
 }
 
 const Dashboard: React.FC = () => {
-  const [enrollments, setEnrollments] = useState<IDataGraph>({
-    value: 10,
-    porcentage: 33,
-  });
-  const [updatedEnrollments, setUpdatedEnrollments] = useState<IDataGraph>({
-    value: 10,
-    porcentage: 33,
-  });
-  const [shutdowns, setShutdowns] = useState<IDataGraph>({
-    value: 10,
-    porcentage: 33,
-  });
-  const [studentsAge, setStudentsAge] = useState<IDataGraphAges[]>([
-    { porcentage: 33, value: 15, total: 10 },
-    { porcentage: 33, value: 15, total: 10 },
-    { porcentage: 33, value: 15, total: 10 },
-  ]);
-  const [groups, setGroups] = useState<IGroups[]>([
-    { label: 'turma', students: 10 },
-    { label: 'turma', students: 6 },
-    { label: 'turma', students: 3 },
-    { label: 'turma', students: 7 },
-    { label: 'turma', students: 4 },
-    { label: 'turma', students: 8 },
-    { label: 'turma', students: 9 },
-  ]);
+  const [enrollmentsGraph, setEnrollmentsGraph] = useState<IEnrollmentsGraph>(
+    {} as IEnrollmentsGraph,
+  );
+  const [studentsAge, setStudentsAge] = useState<IDataGraphAges[]>([]);
+  const [groups, setGroups] = useState<IGroups[]>([]);
 
   useEffect(() => {
     async function loadData(): Promise<void> {
@@ -77,7 +56,6 @@ const Dashboard: React.FC = () => {
 
       let totalEnrollments = 0;
       let totalUpdatedEnrollments = 0;
-      let total = 0;
 
       responseEnrollment.data.forEach((enrollment) => {
         if (enrollment.created_at === enrollment.updated_at) {
@@ -87,21 +65,10 @@ const Dashboard: React.FC = () => {
         }
       });
 
-      total = responseEnrollment.data.length + responseShutdown.data.length;
-
-      setEnrollments({
-        porcentage: getPorcentage(total, totalEnrollments),
-        value: totalEnrollments,
-      });
-
-      setUpdatedEnrollments({
-        porcentage: getPorcentage(total, totalUpdatedEnrollments),
-        value: totalUpdatedEnrollments,
-      });
-
-      setShutdowns({
-        porcentage: getPorcentage(total, responseShutdown.data.length),
-        value: responseShutdown.data.length,
+      setEnrollmentsGraph({
+        enrollments: totalEnrollments,
+        newEnrollments: totalUpdatedEnrollments,
+        shutdowns: responseShutdown.data.length,
       });
     }
 
@@ -174,107 +141,179 @@ const Dashboard: React.FC = () => {
 
       <Content>
         <PieGraphs>
-          <EnrollmentGraph>
+          <PieGraph>
             <strong>
               Comparação entre matrículas, rematrículas e desistências
             </strong>
 
             <div>
-              <main>
-                <VictoryPie
+              {enrollmentsGraph.enrollments ? (
+                <ResponsivePie
                   data={[
                     {
-                      x: `${shutdowns.value}`,
-                      y: Number(`${shutdowns.porcentage}`),
+                      id: 'matriculas',
+                      label: 'Matrículas',
+                      value: enrollmentsGraph.enrollments,
                     },
                     {
-                      x: `${enrollments.value}`,
-                      y: Number(`${enrollments.porcentage}`),
+                      id: 'rematriculas',
+                      label: 'Rematrículas',
+                      value: enrollmentsGraph.newEnrollments,
                     },
                     {
-                      x: `${updatedEnrollments.value}`,
-                      y: Number(`${updatedEnrollments.porcentage}`),
+                      id: 'desistencias',
+                      label: 'Desistencias',
+                      value: enrollmentsGraph.shutdowns,
                     },
                   ]}
-                  style={{
-                    labels: {
-                      fontSize: 24,
+                  margin={{ top: 10, right: 150, bottom: 20, left: 20 }}
+                  colors={['#77CF7C', '#F4D35E', '#eb5160']}
+                  innerRadius={0.6}
+                  borderWidth={1}
+                  borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                  enableSlicesLabels={false}
+                  enableRadialLabels={false}
+                  legends={[
+                    {
+                      anchor: 'right',
+                      itemsSpacing: 18,
+                      translateX: 150,
+                      direction: 'column',
+                      itemWidth: 100,
+                      itemHeight: 30,
+                      itemTextColor: '#999',
+                      symbolSize: 14,
+                      symbolShape: 'circle',
+                      effects: [
+                        {
+                          on: 'hover',
+                          style: {
+                            itemTextColor: '#4F4F4F',
+                          },
+                        },
+                      ],
                     },
-                  }}
-                  height={350}
-                  innerRadius={80}
-                  colorScale={['#EF2D4F', '#299503', '#E7B507']}
+                  ]}
                 />
-              </main>
-
-              <Legend className="enrollment">
-                <li>
-                  <GiPlainCircle color="#299503" />
-                  <span>Matrículas</span>
-                </li>
-                <li>
-                  <GiPlainCircle color="#E7B507" />
-                  <span>Rematrículas</span>
-                </li>
-                <li>
-                  <GiPlainCircle color="#EF2D4F" />
-                  <span>Desistências</span>
-                </li>
-              </Legend>
+              ) : (
+                <span
+                  style={{
+                    display: 'flex',
+                    height: 150,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <BounceLoader color="#6668D0" />
+                </span>
+              )}
             </div>
-          </EnrollmentGraph>
+          </PieGraph>
 
-          <AgeGraph>
+          <PieGraph>
             <strong>Idade dos alunos</strong>
 
             <div>
-              <main>
-                <VictoryPie
-                  data={studentsAge.map((studentAge) => {
+              {studentsAge.length > 0 ? (
+                <ResponsivePie
+                  data={studentsAge.map((age) => {
                     return {
-                      x: `${studentAge.value}`,
-                      y: Number(`${studentAge.porcentage}`),
-                      label: `${studentAge.value} anos`,
+                      id: age.value,
+                      label: `${age.value} anos`,
+                      value: age.total,
                     };
                   })}
-                  style={{
-                    labels: {
-                      fontSize: 18,
+                  margin={{ top: 10, right: 150, bottom: 20, left: 20 }}
+                  colors={{ scheme: 'paired' }}
+                  innerRadius={0.6}
+                  borderWidth={1}
+                  borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                  enableSlicesLabels={false}
+                  enableRadialLabels={false}
+                  legends={[
+                    {
+                      anchor: 'right',
+                      itemsSpacing: 18,
+                      translateX: 150,
+                      direction: 'column',
+                      itemWidth: 100,
+                      itemHeight: 30,
+                      itemTextColor: '#999',
+                      symbolSize: 14,
+                      symbolShape: 'circle',
+                      effects: [
+                        {
+                          on: 'hover',
+                          style: {
+                            itemTextColor: '#4F4F4F',
+                          },
+                        },
+                      ],
                     },
-                  }}
-                  height={340}
-                  innerRadius={80}
-                  colorScale="qualitative"
+                  ]}
                 />
-              </main>
+              ) : (
+                <span
+                  style={{
+                    display: 'flex',
+                    height: 150,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <BounceLoader color="#6668D0" />
+                </span>
+              )}
             </div>
-          </AgeGraph>
+          </PieGraph>
         </PieGraphs>
 
         <BarGraphContent>
           <strong>Alunos por turma</strong>
 
           <BarGraph>
-            <div>
-              <VictoryChart
-                theme={VictoryTheme.material}
-                domainPadding={{ x: 20 }}
-              >
-                <VictoryBar
-                  data={groups.map((group, index) => {
-                    return {
-                      label: group.label,
-                      x: index,
-                      y: group.students,
-                    };
-                  })}
-                  style={{ labels: { fill: 'black' } }}
-                  theme={VictoryTheme.material}
-                  barWidth={20}
-                  width={650}
-                />
-              </VictoryChart>
-            </div>
+            <ResponsiveBar
+              data={groups.map(({ label, students }) => {
+                return {
+                  turma: label,
+                  [label]: students,
+                };
+              })}
+              keys={groups.map((group) => group.label)}
+              indexBy="turma"
+              margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+              padding={0.5}
+              colors={{ scheme: 'nivo' }}
+              borderColor={{ from: 'color', modifiers: [['darker', 5]] }}
+              labelTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
+              legends={[
+                {
+                  dataFrom: 'keys',
+                  anchor: 'bottom-right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 120,
+                  translateY: 0,
+                  itemsSpacing: 2,
+                  itemWidth: 100,
+                  itemHeight: 20,
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 0.85,
+                  symbolSize: 20,
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemOpacity: 1,
+                      },
+                    },
+                  ],
+                },
+              ]}
+              animate
+              motionStiffness={40}
+              motionDamping={15}
+            />
           </BarGraph>
         </BarGraphContent>
       </Content>
