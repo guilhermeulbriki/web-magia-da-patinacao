@@ -1,7 +1,7 @@
 import styled, { keyframes } from 'styled-components';
 import { lighten } from 'polished';
 
-const pointerAnimetion = keyframes`
+const pointerAnimation = keyframes`
   from {
     opacity: 0.8;
     transform: translate(-5px, -25px);
@@ -106,7 +106,7 @@ export const Content = styled.div`
     > img {
       display: none;
 
-      animation: ${pointerAnimetion} 0.4s ease-in;
+      animation: ${pointerAnimation} 0.4s ease-in;
     }
 
     & + div {

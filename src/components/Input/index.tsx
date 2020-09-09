@@ -40,6 +40,12 @@ const Input: React.FC<InputProps> = ({
   }, []);
 
   useEffect(() => {
+    if (defaultValue) {
+      setIsFilled(true);
+    }
+  }, [defaultValue]);
+
+  useEffect(() => {
     registerField({
       name: fieldName,
       ref: inputRef.current,
@@ -54,7 +60,6 @@ const Input: React.FC<InputProps> = ({
       isFilled={isFilled}
       isFocused={isFocused}
       haveIcon={!!Icon}
-      data-testid="input-container"
     >
       {Icon && <Icon size={20} />}
       <input

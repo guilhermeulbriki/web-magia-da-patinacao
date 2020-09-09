@@ -9,7 +9,7 @@ import logo from '../../assets/logo.svg';
 import pointer from '../../assets/pointer.svg';
 import manAvatar from '../../assets/man-avatar.png';
 import dashboard from '../../assets/menu/dashboard.svg';
-import enrollments from '../../assets/menu/familySkating.svg';
+import enrollments from '../../assets/menu/family-skating.svg';
 import students from '../../assets/menu/girl.svg';
 import groups from '../../assets/menu/groups.svg';
 import competitions from '../../assets/menu/competitions.svg';

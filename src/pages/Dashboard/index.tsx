@@ -1,8 +1,18 @@
+/* eslint-disable no-param-reassign */
 import React, { useEffect, useState } from 'react';
-import { VictoryPie } from 'victory';
+import { VictoryPie, VictoryBar, VictoryTheme, VictoryChart } from 'victory';
 import { GiPlainCircle } from 'react-icons/gi';
 
-import { Container, Content, Graph, Legend, PieGraphs } from './styles';
+import {
+  Container,
+  Content,
+  EnrollmentGraph,
+  AgeGraph,
+  Legend,
+  PieGraphs,
+  BarGraphContent,
+  BarGraph,
+} from './styles';
 import SideMenu from '../../components/SideMenu';
 import api from '../../services/api';
 import getPorcentage from '../../utils/getPorcentage';
@@ -12,9 +22,24 @@ interface IDataGraph {
   porcentage: number;
 }
 
+interface IDataGraphAges {
+  value: number;
+  total: number;
+  porcentage: number;
+}
+
 interface Enrollment {
   created_at: Date;
   updated_at: Date;
+}
+
+interface StudentsAgeDTO {
+  age: number;
+}
+
+interface IGroups {
+  label: string;
+  students: number;
 }
 
 const Dashboard: React.FC = () => {
@@ -30,10 +55,23 @@ const Dashboard: React.FC = () => {
     value: 10,
     porcentage: 33,
   });
+  const [studentsAge, setStudentsAge] = useState<IDataGraphAges[]>([
+    { porcentage: 33, value: 15, total: 10 },
+    { porcentage: 33, value: 15, total: 10 },
+    { porcentage: 33, value: 15, total: 10 },
+  ]);
+  const [groups, setGroups] = useState<IGroups[]>([
+    { label: 'turma', students: 10 },
+    { label: 'turma', students: 6 },
+    { label: 'turma', students: 3 },
+    { label: 'turma', students: 7 },
+    { label: 'turma', students: 4 },
+    { label: 'turma', students: 8 },
+    { label: 'turma', students: 9 },
+  ]);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    async function loadData() {
+    async function loadData(): Promise<void> {
       const responseEnrollment = await api.get<Enrollment[]>('/enrollments');
       const responseShutdown = await api.get('/shutdowns');
 
@@ -70,13 +108,73 @@ const Dashboard: React.FC = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    async function loadData(): Promise<void> {
+      const studentsAgeData = await api.get<StudentsAgeDTO[]>('/studentsAges');
+
+      let formatedData: IDataGraphAges[] = [];
+      let totalData = 0;
+
+      studentsAgeData.data.forEach(({ age }) => {
+        if (formatedData.length > 0) {
+          formatedData.forEach((data) => {
+            if (data.value === age) {
+              data.total += 1;
+              data.porcentage = getPorcentage(totalData, data.porcentage);
+            } else {
+              formatedData.push({
+                value: age,
+                total: 1,
+                porcentage: getPorcentage(totalData, 1),
+              });
+            }
+          });
+        } else {
+          formatedData = [{ value: age, total: 1, porcentage: 100 }];
+        }
+
+        totalData += 1;
+      });
+
+      setStudentsAge(formatedData);
+    }
+
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    interface IGroupsForEach {
+      name: string;
+      students: [];
+    }
+
+    async function loadData(): Promise<void> {
+      const groupsData = await api.get('/groups/list', {
+        params: { city: '' },
+      });
+
+      const formatedData: IGroups[] = [];
+
+      groupsData.data.forEach((group: IGroupsForEach) => {
+        formatedData.push({
+          label: group.name,
+          students: group.students.length > 0 ? group.students.length : 1,
+        });
+      });
+
+      setGroups(formatedData);
+    }
+
+    loadData();
+  }, []);
+
   return (
     <Container>
       <SideMenu />
 
       <Content>
         <PieGraphs>
-          <Graph>
+          <EnrollmentGraph>
             <strong>
               Comparação entre matrículas, rematrículas e desistências
             </strong>
@@ -124,47 +222,61 @@ const Dashboard: React.FC = () => {
                 </li>
               </Legend>
             </div>
-          </Graph>
+          </EnrollmentGraph>
 
-          <Graph>
+          <AgeGraph>
             <strong>Idade dos alunos</strong>
 
             <div>
               <main>
                 <VictoryPie
-                  data={[
-                    { x: '192', y: 27 },
-                    { x: '232', y: 33 },
-                    { x: '292', y: 40 },
-                  ]}
+                  data={studentsAge.map((studentAge) => {
+                    return {
+                      x: `${studentAge.value}`,
+                      y: Number(`${studentAge.porcentage}`),
+                      label: `${studentAge.value} anos`,
+                    };
+                  })}
                   style={{
                     labels: {
-                      fontSize: 24,
+                      fontSize: 18,
                     },
                   }}
-                  height={350}
+                  height={340}
                   innerRadius={80}
-                  colorScale={['#EB2DEF', '#1F4A6E', '#0AB1B1']}
+                  colorScale="qualitative"
                 />
               </main>
-
-              <Legend className="age">
-                <li>
-                  <GiPlainCircle color="#1F4A6E" />
-                  <span>18 anos</span>
-                </li>
-                <li>
-                  <GiPlainCircle color="#0AB1B1" />
-                  <span>16 anos</span>
-                </li>
-                <li>
-                  <GiPlainCircle color="#EB2DEF" />
-                  <span>15 anos</span>
-                </li>
-              </Legend>
             </div>
-          </Graph>
+          </AgeGraph>
         </PieGraphs>
+
+        <BarGraphContent>
+          <strong>Alunos por turma</strong>
+
+          <BarGraph>
+            <div>
+              <VictoryChart
+                theme={VictoryTheme.material}
+                domainPadding={{ x: 20 }}
+              >
+                <VictoryBar
+                  data={groups.map((group, index) => {
+                    return {
+                      label: group.label,
+                      x: index,
+                      y: group.students,
+                    };
+                  })}
+                  style={{ labels: { fill: 'black' } }}
+                  theme={VictoryTheme.material}
+                  barWidth={20}
+                  width={650}
+                />
+              </VictoryChart>
+            </div>
+          </BarGraph>
+        </BarGraphContent>
       </Content>
     </Container>
   );
