@@ -23,6 +23,10 @@ export default createGlobalStyle`
     font-size: 18px;
   }
 
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #f9f9f9 inset !important;
+  }
+
   button {
     cursor: pointer;
   }

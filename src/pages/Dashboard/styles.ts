@@ -31,6 +31,14 @@ const pieGraphAnimation = keyframes`
   }
 `;
 
+const pieGraphLegendAnimation = keyframes`
+  from {
+    opacity: 0;
+  } to {
+    opacity: 1;
+  }
+`;
+
 export const PieGraph = styled.article`
   min-width: 380px;
 
@@ -52,7 +60,11 @@ export const PieGraph = styled.article`
     transition: 0.3s;
 
     > div div svg g g path {
-      animation: ${pieGraphAnimation} 1.3s;
+      animation: ${pieGraphAnimation} 1.5s ease-out;
+    }
+
+    div div svg g g:last-child g {
+      animation: ${pieGraphLegendAnimation} 1.5s ease-out;
     }
 
     &:hover {
