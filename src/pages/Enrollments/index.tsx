@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsivePie } from '@nivo/pie';
 import { BounceLoader } from 'react-spinners';
-import { FiSearch, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiArrowLeft,
+  FiArrowRight,
+  FiSettings,
+  FiTrash,
+} from 'react-icons/fi';
 
 import api from '../../services/api';
 import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
@@ -16,6 +22,7 @@ import {
   SponsorTable,
   SponsorTableSearch,
   SponsorTablePagination,
+  SponsorTableContent,
 } from './styles';
 
 interface IEnrollmentsGraph {
@@ -34,11 +41,27 @@ interface IGroups {
   students: number;
 }
 
+interface IStudents {
+  id: string;
+  name: string;
+  sponsor: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+  enrollment: {
+    id: string;
+    status: 'ok' | 'pending';
+  };
+}
+
 const Enrollments: React.FC = () => {
   const [enrollmentsGraph, setEnrollmentsGraph] = useState<IEnrollmentsGraph>(
     {} as IEnrollmentsGraph,
   );
   const [groups, setGroups] = useState<IGroups[]>([]);
+  const [page, setPage] = useState(1);
+  const [students, setStudents] = useState<IStudents[]>([]);
 
   useEffect(() => {
     async function loadData(): Promise<void> {
@@ -91,6 +114,18 @@ const Enrollments: React.FC = () => {
 
     loadData();
   }, []);
+
+  useEffect(() => {
+    api
+      .get(`students/${page}`, {
+        params: {
+          name: '',
+          age: '',
+          group: '',
+        },
+      })
+      .then((response) => setStudents(response.data));
+  }, [page]);
 
   return (
     <Container>
@@ -208,6 +243,59 @@ const Enrollments: React.FC = () => {
               <FiArrowRight color="#1F4A6E" size={16} />
             </SponsorTablePagination>
           </header>
+
+          <SponsorTableContent>
+            <section>
+              <strong>Responsável</strong>
+              {students.map((student) => (
+                <span key={student.sponsor.id}>{student.sponsor.name}</span>
+              ))}
+            </section>
+            <section>
+              <strong>Aluno(a)</strong>
+              {students.map((student) => (
+                <span key={student.id}>{student.name}</span>
+              ))}
+            </section>
+            <section>
+              <strong>Telefone</strong>
+              {students.map((student) => (
+                <span key={student.sponsor.id}>{student.sponsor.phone}</span>
+              ))}
+            </section>
+            <section>
+              <strong>Matrícula</strong>
+              {students.map((student) => (
+                <span
+                  key={student.enrollment.id}
+                  className={student.enrollment.status}
+                >
+                  {student.enrollment.status === 'ok'
+                    ? 'Matriculado(a)'
+                    : 'Pendente'}
+                </span>
+              ))}
+            </section>
+            <section>
+              <strong>
+                <FiSettings />
+              </strong>
+              {students.map((student) => (
+                <span key={student.sponsor.id}>
+                  <FiTrash size={18} color="#eb5757" />
+                </span>
+              ))}
+            </section>
+          </SponsorTableContent>
+
+          <footer>
+            <span>
+              Novos associados: <strong>000</strong>
+            </span>
+            <span>
+              Total de associados: <strong>000</strong>
+            </span>
+          </footer>
         </SponsorTable>
       </Content>
     </Container>

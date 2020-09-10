@@ -147,7 +147,6 @@ export const SponsorTable = styled.div`
   margin-top: 48px;
   border-radius: 16px;
   padding: 16px 24px;
-  min-height: 400px;
 
   transition: 0.3s;
 
@@ -172,6 +171,21 @@ export const SponsorTable = styled.div`
         font-weight: 600;
         margin-right: 16px;
       }
+    }
+  }
+
+  footer {
+    width: 100%;
+    display: flex;
+
+    > span {
+      margin-right: 16px;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #00111f;
     }
   }
 `;
@@ -217,6 +231,63 @@ export const SponsorTablePagination = styled.aside`
       color: #1f4a6e;
       font-size: 16px;
       font-weight: 500;
+    }
+  }
+`;
+
+export const SponsorTableContent = styled.main`
+  min-height: 300px;
+  max-height: 600px;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #dadada;
+  margin: 20px 0;
+  text-align: center;
+  padding: 8px;
+  overflow-y: auto;
+
+  display: flex;
+  justify-content: space-around;
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #0084b9;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #00a3e4;
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+
+    > strong {
+      font-size: 16px;
+      color: #00111f;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    span {
+      height: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #00111f;
+      font-weight: 400;
+      margin-bottom: 8px;
+
+      &.pending {
+        color: #eb5757;
+      }
+
+      &.ok {
+        color: #27ae60;
+      }
     }
   }
 `;

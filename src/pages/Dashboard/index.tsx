@@ -19,7 +19,6 @@ import getPorcentage from '../../utils/getPorcentage';
 interface IDataGraphAges {
   value: number;
   total: number;
-  porcentage: number;
 }
 
 interface Enrollment {
@@ -80,27 +79,21 @@ const Dashboard: React.FC = () => {
       const studentsAgeData = await api.get<StudentsAgeDTO[]>('/studentsAges');
 
       let formatedData: IDataGraphAges[] = [];
-      let totalData = 0;
 
       studentsAgeData.data.forEach(({ age }) => {
         if (formatedData.length > 0) {
-          formatedData.forEach((data) => {
-            if (data.value === age) {
-              data.total += 1;
-              data.porcentage = getPorcentage(totalData, data.porcentage);
-            } else {
-              formatedData.push({
-                value: age,
-                total: 1,
-                porcentage: getPorcentage(totalData, 1),
-              });
-            }
-          });
+          const checkIfExists = formatedData.find((data) => data.value === age);
+          if (checkIfExists) {
+            checkIfExists.total += 1;
+          } else {
+            formatedData.push({
+              value: age,
+              total: 1,
+            });
+          }
         } else {
-          formatedData = [{ value: age, total: 1, porcentage: 100 }];
+          formatedData = [{ value: age, total: 1 }];
         }
-
-        totalData += 1;
       });
 
       setStudentsAge(formatedData);
