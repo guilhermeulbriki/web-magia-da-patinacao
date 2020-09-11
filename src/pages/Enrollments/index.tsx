@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-curly-newline */
 import React, { useState, useEffect } from 'react';
 import { ResponsivePie } from '@nivo/pie';
 import { BounceLoader } from 'react-spinners';
@@ -9,7 +10,6 @@ import {
   FiTrash,
 } from 'react-icons/fi';
 
-import api from '../../services/api';
 import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
 import SideMenu from '../../components/SideMenu';
 import {
@@ -24,6 +24,8 @@ import {
   SponsorTablePagination,
   SponsorTableContent,
 } from './styles';
+import { useFetch } from '../../hooks/useFetch';
+import api from '../../services/api';
 
 interface IEnrollmentsGraph {
   enrollments: number;
@@ -39,6 +41,12 @@ interface Enrollment {
 interface IGroups {
   label: string;
   students: number;
+}
+
+interface StudentsAgeDTO {
+  age: number;
+  name: string;
+  students: [];
 }
 
 interface IStudents {
@@ -62,16 +70,28 @@ const Enrollments: React.FC = () => {
   const [groups, setGroups] = useState<IGroups[]>([]);
   const [page, setPage] = useState(1);
   const [students, setStudents] = useState<IStudents[]>([]);
+  const [filterSponsorName, setFilterSponsorName] = useState('');
+
+  const { data: responseEnrollment } = useFetch<Enrollment[]>('/enrollments');
+  const { data: responseShutdown } = useFetch('/shutdowns');
+  const { data: groupsData } = useFetch<StudentsAgeDTO[]>('/groups/list', {
+    params: { city: '' },
+  });
+  const { data: studentsData } = useFetch<IStudents[]>(`students/${page}`, {
+    params: {
+      name: '',
+      sponsor_name: filterSponsorName,
+      age: '',
+      group: '',
+    },
+  });
 
   useEffect(() => {
-    async function loadData(): Promise<void> {
-      const responseEnrollment = await api.get<Enrollment[]>('/enrollments');
-      const responseShutdown = await api.get('/shutdowns');
+    let totalEnrollments = 0;
+    let totalUpdatedEnrollments = 0;
 
-      let totalEnrollments = 0;
-      let totalUpdatedEnrollments = 0;
-
-      responseEnrollment.data.forEach((enrollment) => {
+    if (responseEnrollment && responseShutdown) {
+      responseEnrollment.forEach((enrollment) => {
         if (enrollment.created_at === enrollment.updated_at) {
           totalEnrollments += 1;
         } else {
@@ -82,27 +102,16 @@ const Enrollments: React.FC = () => {
       setEnrollmentsGraph({
         enrollments: totalEnrollments,
         newEnrollments: totalUpdatedEnrollments,
-        shutdowns: responseShutdown.data.length,
+        shutdowns: responseShutdown.length,
       });
     }
-
-    loadData();
-  }, []);
+  }, [responseEnrollment, responseShutdown]);
 
   useEffect(() => {
-    interface IGroupsForEach {
-      name: string;
-      students: [];
-    }
+    const formatedData: IGroups[] = [];
 
-    async function loadData(): Promise<void> {
-      const groupsData = await api.get('/groups/list', {
-        params: { city: '' },
-      });
-
-      const formatedData: IGroups[] = [];
-
-      groupsData.data.forEach((group: IGroupsForEach) => {
+    if (groupsData) {
+      groupsData.forEach((group: StudentsAgeDTO) => {
         formatedData.push({
           label: group.name,
           students: group.students.length > 0 ? group.students.length : 1,
@@ -111,21 +120,24 @@ const Enrollments: React.FC = () => {
 
       setGroups(formatedData);
     }
+  }, [groupsData]);
 
-    loadData();
-  }, []);
+  useEffect(() => {
+    if (studentsData) setStudents(studentsData);
+  }, [studentsData]);
 
   useEffect(() => {
     api
       .get(`students/${page}`, {
         params: {
           name: '',
+          sponsor_name: filterSponsorName,
           age: '',
           group: '',
         },
       })
       .then((response) => setStudents(response.data));
-  }, [page]);
+  }, [filterSponsorName, page]);
 
   return (
     <Container>
@@ -230,17 +242,34 @@ const Enrollments: React.FC = () => {
               <strong>Associados</strong>
 
               <SponsorTableSearch>
-                <input type="text" placeholder="Buscar" />
+                <input
+                  value={filterSponsorName}
+                  type="text"
+                  placeholder="Buscar"
+                  onChange={(e) => setFilterSponsorName(e.target.value)}
+                />
                 <FiSearch color="#929292" size={18} />
               </SponsorTableSearch>
             </section>
 
             <SponsorTablePagination>
-              <FiArrowLeft color="#1F4A6E" size={16} />
+              <FiArrowLeft
+                onClick={() =>
+                  setPage((oldValue) =>
+                    oldValue > 1 ? oldValue - 1 : oldValue,
+                  )
+                }
+                color="#1F4A6E"
+                size={16}
+              />
               <span>
-                Página: <strong>1 </strong>
+                Página: <strong>{page} </strong>
               </span>
-              <FiArrowRight color="#1F4A6E" size={16} />
+              <FiArrowRight
+                onClick={() => setPage((oldValue) => oldValue + 1)}
+                color="#1F4A6E"
+                size={16}
+              />
             </SponsorTablePagination>
           </header>
 
@@ -248,7 +277,7 @@ const Enrollments: React.FC = () => {
             <section>
               <strong>Responsável</strong>
               {students.map((student) => (
-                <span key={student.sponsor.id}>{student.sponsor.name}</span>
+                <span key={`${student.id}name`}>{student.sponsor.name}</span>
               ))}
             </section>
             <section>
@@ -260,7 +289,7 @@ const Enrollments: React.FC = () => {
             <section>
               <strong>Telefone</strong>
               {students.map((student) => (
-                <span key={student.sponsor.id}>{student.sponsor.phone}</span>
+                <span key={`${student.id}phone`}>{student.sponsor.phone}</span>
               ))}
             </section>
             <section>
@@ -281,7 +310,7 @@ const Enrollments: React.FC = () => {
                 <FiSettings />
               </strong>
               {students.map((student) => (
-                <span key={student.sponsor.id}>
+                <span key={`${student.id}config`}>
                   <FiTrash size={18} color="#eb5757" />
                 </span>
               ))}

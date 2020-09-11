@@ -220,6 +220,10 @@ export const SponsorTablePagination = styled.aside`
   display: flex;
   align-items: center;
 
+  svg {
+    cursor: pointer;
+  }
+
   > span {
     margin: 0 4px;
     font-size: 14px;

@@ -13,8 +13,7 @@ import {
   BarGraph,
 } from './styles';
 import SideMenu from '../../components/SideMenu';
-import api from '../../services/api';
-import getPorcentage from '../../utils/getPorcentage';
+import { useFetch } from '../../hooks/useFetch';
 
 interface IDataGraphAges {
   value: number;
@@ -34,6 +33,8 @@ interface IEnrollmentsGraph {
 
 interface StudentsAgeDTO {
   age: number;
+  name: string;
+  students: [];
 }
 
 interface IGroups {
@@ -48,15 +49,19 @@ const Dashboard: React.FC = () => {
   const [studentsAge, setStudentsAge] = useState<IDataGraphAges[]>([]);
   const [groups, setGroups] = useState<IGroups[]>([]);
 
+  const { data: responseEnrollment } = useFetch<Enrollment[]>('/enrollments');
+  const { data: responseShutdown } = useFetch('/shutdowns');
+  const { data: studentsAgeData } = useFetch<StudentsAgeDTO[]>('/studentsAges');
+  const { data: groupsData } = useFetch<StudentsAgeDTO[]>('/groups/list', {
+    params: { city: '' },
+  });
+
   useEffect(() => {
-    async function loadData(): Promise<void> {
-      const responseEnrollment = await api.get<Enrollment[]>('/enrollments');
-      const responseShutdown = await api.get('/shutdowns');
+    let totalEnrollments = 0;
+    let totalUpdatedEnrollments = 0;
 
-      let totalEnrollments = 0;
-      let totalUpdatedEnrollments = 0;
-
-      responseEnrollment.data.forEach((enrollment) => {
+    if (responseEnrollment && responseShutdown) {
+      responseEnrollment.forEach((enrollment) => {
         if (enrollment.created_at === enrollment.updated_at) {
           totalEnrollments += 1;
         } else {
@@ -67,20 +72,16 @@ const Dashboard: React.FC = () => {
       setEnrollmentsGraph({
         enrollments: totalEnrollments,
         newEnrollments: totalUpdatedEnrollments,
-        shutdowns: responseShutdown.data.length,
+        shutdowns: responseShutdown.length,
       });
     }
-
-    loadData();
-  }, []);
+  }, [responseEnrollment, responseShutdown]);
 
   useEffect(() => {
-    async function loadData(): Promise<void> {
-      const studentsAgeData = await api.get<StudentsAgeDTO[]>('/studentsAges');
+    let formatedData: IDataGraphAges[] = [];
 
-      let formatedData: IDataGraphAges[] = [];
-
-      studentsAgeData.data.forEach(({ age }) => {
+    if (studentsAgeData) {
+      studentsAgeData.forEach(({ age }) => {
         if (formatedData.length > 0) {
           const checkIfExists = formatedData.find((data) => data.value === age);
           if (checkIfExists) {
@@ -98,35 +99,22 @@ const Dashboard: React.FC = () => {
 
       setStudentsAge(formatedData);
     }
-
-    loadData();
-  }, []);
+  }, [studentsAgeData]);
 
   useEffect(() => {
-    interface IGroupsForEach {
-      name: string;
-      students: [];
-    }
+    const formatedData: IGroups[] = [];
 
-    async function loadData(): Promise<void> {
-      const groupsData = await api.get('/groups/list', {
-        params: { city: '' },
-      });
-
-      const formatedData: IGroups[] = [];
-
-      groupsData.data.forEach((group: IGroupsForEach) => {
+    if (groupsData) {
+      groupsData.forEach((group: StudentsAgeDTO) => {
         formatedData.push({
           label: group.name,
-          students: group.students.length > 0 ? group.students.length : 1,
+          students: group.students.length > 0 ? group.students.length : 0.1,
         });
       });
 
       setGroups(formatedData);
     }
-
-    loadData();
-  }, []);
+  }, [groupsData]);
 
   return (
     <Container>
@@ -226,7 +214,6 @@ const Dashboard: React.FC = () => {
                   legends={[
                     {
                       anchor: 'right',
-                      itemsSpacing: 18,
                       translateX: 150,
                       direction: 'column',
                       itemWidth: 100,
@@ -274,11 +261,11 @@ const Dashboard: React.FC = () => {
               })}
               keys={groups.map((group) => group.label)}
               indexBy="turma"
+              enableLabel={false}
               margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
               padding={0.5}
               colors={{ scheme: 'nivo' }}
               borderColor={{ from: 'color', modifiers: [['darker', 5]] }}
-              labelTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
               legends={[
                 {
                   dataFrom: 'keys',
