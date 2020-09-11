@@ -12,17 +12,14 @@ export const Container = styled.div<ContainerProps>`
   background: #F9F9F9;
   border-radius: 16px;
   padding: 16px;
-  width: 294px;
+  flex: 1;
+  min-width: 159px;
 
   box-shadow: 5px 4px 10px rgba(22, 33, 39, 0.25);
   color: #929292;
 
   display: flex;
   align-items: center;
-
-  & + div {
-    margin-top: 16px;
-  }
 
   ${(props) =>
     props.isFocused &&

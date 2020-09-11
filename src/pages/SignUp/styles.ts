@@ -75,6 +75,10 @@ export const Inputs = styled.section`
   display: flex;
   justify-content: space-around;
 
+  div + div {
+    margin-top: 16px;
+  }
+
   article + article {
     margin-left: 32px;
   }

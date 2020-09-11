@@ -52,6 +52,10 @@ export const Content = styled.div`
     flex-direction: column;
     align-items: center;
 
+    div {
+      margin-bottom: 16px;
+    }
+
     h1 {
       margin-bottom: 24px;
       font-size: 20px;

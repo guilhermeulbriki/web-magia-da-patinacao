@@ -21,19 +21,6 @@ const familyAnimation = keyframes`
   }
 `;
 
-const formAnimation = keyframes`
-0% {
-  opacity: 0;
-  transform: scale(0.2);
-} 70% {
-  opacity: 0.8;
-  transform: scale(1.1);
-} 100% {
-  opacity: 1;
-  transform: scale(1);
-}
-`;
-
 export const Container = styled.main`
   padding: 16px;
   width: 100%;
@@ -65,12 +52,14 @@ export const Content = styled.div`
     top: 32px;
   }
 
+  div + div {
+    margin-top: 16px;
+  }
+
   form {
     margin: auto 0;
     margin-left: 72px;
     max-width: 294px;
-
-    /* animation: ${formAnimation} 1s ease-in-out; */
 
     h1 {
       font-size: 54px;

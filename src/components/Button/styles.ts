@@ -17,4 +17,8 @@ export const Container = styled.button`
   &:hover {
     background: ${shade(0.1, '#00A3E4')};
   }
+
+  &:active {
+    background: ${shade(0.6, '#00A3E4')};
+  }
 `;
