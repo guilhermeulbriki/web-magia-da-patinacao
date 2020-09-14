@@ -1,10 +1,6 @@
 import styled, { keyframes } from 'styled-components';
 import { Form } from '@unform/web';
 
-interface IGroupProps {
-  index: number;
-}
-
 export const Container = styled.div`
   width: 100%;
   display: flex;
@@ -103,7 +99,7 @@ export const GroupsList = styled.main`
   margin-top: 24px;
 `;
 
-export const Group = styled.article<IGroupProps>`
+export const Group = styled.article`
   background: #f9f9f9;
   padding: 16px;
   width: 100%;

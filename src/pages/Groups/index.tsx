@@ -1,4 +1,6 @@
-import React from 'react';
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+import React, { useEffect, useState, useCallback } from 'react';
 import { FiEdit2, FiPlus, FiTrash } from 'react-icons/fi';
 
 import {
@@ -17,8 +19,59 @@ import {
 import SideMenu from '../../components/SideMenu';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import { useFetch } from '../../hooks/useFetch';
+import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
+import api from '../../services/api';
+
+interface IGroups {
+  id: string;
+  name: string;
+  color: string;
+  city: string;
+  instructor: string;
+  schedules: Array<{
+    id: string;
+    day: string;
+    start: string;
+    finish: string;
+  }>;
+}
 
 const Groups: React.FC = () => {
+  const [groups, setGroups] = useState<IGroups[]>([]);
+  const [selectedCity, setSelectedCity] = useState('');
+
+  const { data: groupsData } = useFetch<IGroups[]>('/groups/list', {
+    params: { city: '' },
+  });
+
+  useEffect(() => {
+    if (groupsData) {
+      setGroups(groupsData);
+    }
+  }, [groupsData]);
+
+  useEffect(() => {
+    api
+      .get('/groups/list', {
+        params: { city: selectedCity },
+      })
+      .then((response) => setGroups(response.data));
+  }, [selectedCity]);
+
+  const handleSelectCity = useCallback(
+    (city: string) => {
+      const alreadySelected = selectedCity === city;
+
+      if (alreadySelected) {
+        setSelectedCity('');
+      } else {
+        setSelectedCity(city);
+      }
+    },
+    [selectedCity],
+  );
+
   return (
     <Container>
       <SideMenu />
@@ -34,115 +87,71 @@ const Groups: React.FC = () => {
           </header>
 
           <GroupsListCities>
-            <span className="active">Seberi</span>
-            <span>Frederico Westphalen</span>
-            <span>Palmitinho</span>
-            <span>Seberi</span>
-            <span>Taquaruçu do Sul</span>
+            <span
+              className={selectedCity === 'seberi' ? 'active' : ''}
+              onClick={() => handleSelectCity('seberi')}
+            >
+              Seberi
+            </span>
+            <span
+              className={
+                selectedCity === 'frederico westphalen' ? 'active' : ''
+              }
+              onClick={() => handleSelectCity('frederico westphalen')}
+            >
+              Frederico Westphalen
+            </span>
+            <span
+              className={selectedCity === 'palmitinho' ? 'active' : ''}
+              onClick={() => handleSelectCity('palmitinho')}
+            >
+              Palmitinho
+            </span>
+            <span
+              className={selectedCity === 'taquaruçu do sul' ? 'active' : ''}
+              onClick={() => handleSelectCity('taquaruçu do sul')}
+            >
+              Taquaruçu do Sul
+            </span>
           </GroupsListCities>
 
           <GroupsList>
-            <Group index={1}>
-              <header>
-                <strong>Branca</strong>
+            {groups.map((group) => (
+              <Group>
+                <header>
+                  <strong>{putFirstLetterUperCase(group.name)}</strong>
 
-                <aside>
-                  <span className="city">Frederico Westphalen</span>
-                  <span className="teacher">Julia Girardello Frizon</span>
-                </aside>
-              </header>
+                  <aside>
+                    <span className="city">
+                      {putFirstLetterUperCase(group.city)}
+                    </span>
+                    <span className="teacher">
+                      {putFirstLetterUperCase(group.instructor)}
+                    </span>
+                  </aside>
+                </header>
 
-              <GroupSchedules>
-                <main>
-                  <GroupSchedule>
-                    <p>Segunda</p>
+                <GroupSchedules>
+                  <main>
+                    {group.schedules.map((schedule) => (
+                      <GroupSchedule>
+                        <p>{putFirstLetterUperCase(schedule.day)}</p>
 
-                    <span>8: 30 - 9:30</span>
-                    <span>10: 30 - 11:30</span>
-                  </GroupSchedule>
+                        <span>
+                          {schedule.start} - {schedule.finish}
+                        </span>
+                      </GroupSchedule>
+                    ))}
+                  </main>
 
-                  <GroupSchedule>
-                    <p>Quinta</p>
-
-                    <span>8: 30 - 9:30</span>
-                  </GroupSchedule>
-                </main>
-
-                <aside>
-                  <FiEdit2 color="#219653" />
-                  <FiTrash color="#EB5757" />
-                  <FiPlus color="#F2994A" />
-                </aside>
-              </GroupSchedules>
-            </Group>
-
-            <Group index={2}>
-              <header>
-                <strong>Branca</strong>
-
-                <aside>
-                  <span className="city">Frederico Westphalen</span>
-                  <span className="teacher">Julia Girardello Frizon</span>
-                </aside>
-              </header>
-
-              <GroupSchedules>
-                <main>
-                  <GroupSchedule>
-                    <p>Segunda</p>
-
-                    <span>8: 30 - 9:30</span>
-                    <span>10: 30 - 11:30</span>
-                  </GroupSchedule>
-
-                  <GroupSchedule>
-                    <p>Quinta</p>
-
-                    <span>8: 30 - 9:30</span>
-                  </GroupSchedule>
-                </main>
-
-                <aside>
-                  <FiEdit2 color="#219653" />
-                  <FiTrash color="#EB5757" />
-                  <FiPlus color="#F2994A" />
-                </aside>
-              </GroupSchedules>
-            </Group>
-
-            <Group index={3}>
-              <header>
-                <strong>Branca</strong>
-
-                <aside>
-                  <span className="city">Frederico Westphalen</span>
-                  <span className="teacher">Julia Girardello Frizon</span>
-                </aside>
-              </header>
-
-              <GroupSchedules>
-                <main>
-                  <GroupSchedule>
-                    <p>Segunda</p>
-
-                    <span>8: 30 - 9:30</span>
-                    <span>10: 30 - 11:30</span>
-                  </GroupSchedule>
-
-                  <GroupSchedule>
-                    <p>Quinta</p>
-
-                    <span>8: 30 - 9:30</span>
-                  </GroupSchedule>
-                </main>
-
-                <aside>
-                  <FiEdit2 color="#219653" />
-                  <FiTrash color="#EB5757" />
-                  <FiPlus color="#F2994A" />
-                </aside>
-              </GroupSchedules>
-            </Group>
+                  <aside>
+                    <FiEdit2 color="#219653" />
+                    <FiTrash color="#EB5757" />
+                    <FiPlus color="#F2994A" />
+                  </aside>
+                </GroupSchedules>
+              </Group>
+            ))}
           </GroupsList>
         </GroupsContent>
 
