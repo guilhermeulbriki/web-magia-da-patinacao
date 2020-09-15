@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { FiEdit2, FiPlus, FiTrash } from 'react-icons/fi';
+import { IoIosClose } from 'react-icons/io';
 import { FormHandles } from '@unform/core';
 import { mutate as mutateGlobal } from 'swr';
 
@@ -14,6 +15,7 @@ import {
   Group,
   GroupSchedules,
   GroupSchedule,
+  GroupScheduleActions,
   GroupsEdit,
   AddGroup,
   UpdateGroup,
@@ -47,6 +49,9 @@ const Groups: React.FC = () => {
   const [groups, setGroups] = useState<IGroups[]>([]);
   const [filteredCity, setFilteredCity] = useState('');
   const [selectedCity, setSelectedCity] = useState<IGroups>({} as IGroups);
+  const [functionClicked, setFunctionClicked] = useState<
+    'delete' | 'alter' | 'add' | null
+  >();
 
   const { data: groupsData, mutate } = useFetch<IGroups[]>('/groups/list', {
     params: { city: '' },
@@ -154,6 +159,47 @@ const Groups: React.FC = () => {
     setSelectedCity(data);
   }, []);
 
+  const handleDeleteGroup = useCallback(
+    async (id: string) => {
+      await api.delete(`groups/${id}`);
+
+      const updatedGroups = groups.filter((group) => group.id === id);
+
+      if (selectedCity.id === id) formUpdateRef.current?.reset();
+
+      mutate(updatedGroups, true);
+      mutateGlobal('/groups/list', updatedGroups);
+    },
+    [groups, mutate, selectedCity.id],
+  );
+
+  const handleSetFunctionClick = useCallback(
+    (action: 'delete' | 'alter' | 'add' | null) => {
+      if (functionClicked !== action) {
+        setFunctionClicked(action);
+      } else {
+        setFunctionClicked(null);
+      }
+    },
+    [functionClicked],
+  );
+
+  const handleDeleteSchedule = useCallback(
+    async (id: string) => {
+      await api.delete(`schedules/${id}`);
+
+      const updatedGroups = groups.map((group) => {
+        group.schedules.filter((schedule) => schedule.id === id);
+
+        return group;
+      });
+
+      mutate(updatedGroups, true);
+      mutateGlobal('/groups/list', updatedGroups);
+    },
+    [mutate, groups],
+  );
+
   return (
     <Container>
       <SideMenu />
@@ -200,11 +246,20 @@ const Groups: React.FC = () => {
           <GroupsList>
             {groups.map((group) => (
               <Group
-                selected={selectedCity.name === group.name}
+                selected={selectedCity.id === group.id}
                 onClick={() => handleSetData(group)}
               >
                 <header>
-                  <strong>{putFirstLetterUperCase(group.name)}</strong>
+                  <span>
+                    <strong>{putFirstLetterUperCase(group.name)}</strong>
+                    {selectedCity.id === group.id &&
+                      functionClicked === 'delete' && (
+                        <FiTrash
+                          color="#EB5757"
+                          onClick={() => handleDeleteGroup(group.id)}
+                        />
+                      )}
+                  </span>
 
                   <aside>
                     <span className="city">
@@ -220,20 +275,48 @@ const Groups: React.FC = () => {
                   <main>
                     {group.schedules.map((schedule) => (
                       <GroupSchedule>
-                        <p>{putFirstLetterUperCase(schedule.day)}</p>
+                        {selectedCity.id === group.id &&
+                          functionClicked === 'delete' && (
+                            <span>
+                              <IoIosClose
+                                color="#EB5757"
+                                size={24}
+                                onClick={
+                                  () => handleDeleteSchedule(schedule.id)
+                                  // eslint-disable-next-line react/jsx-curly-newline
+                                }
+                              />
+                            </span>
+                          )}
 
-                        <span>
-                          {schedule.start} - {schedule.finish}
-                        </span>
+                        <div>
+                          <p>{putFirstLetterUperCase(schedule.day)}</p>
+
+                          <span>
+                            {schedule.start} - {schedule.finish}
+                          </span>
+                        </div>
                       </GroupSchedule>
                     ))}
                   </main>
 
-                  <aside>
-                    <FiEdit2 color="#219653" />
-                    <FiTrash color="#EB5757" />
-                    <FiPlus color="#F2994A" />
-                  </aside>
+                  <GroupScheduleActions>
+                    <FiEdit2
+                      onClick={() => handleSetFunctionClick('alter')}
+                      color="#219653"
+                      name="alter"
+                    />
+                    <FiTrash
+                      onClick={() => handleSetFunctionClick('delete')}
+                      color="#EB5757"
+                      name="delete"
+                    />
+                    <FiPlus
+                      onClick={() => handleSetFunctionClick('add')}
+                      color="#F2994A"
+                      name="add"
+                    />
+                  </GroupScheduleActions>
                 </GroupSchedules>
               </Group>
             ))}

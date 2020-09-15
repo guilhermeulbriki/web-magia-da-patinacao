@@ -132,9 +132,15 @@ export const Group = styled.article<IGroupsProps>`
     padding-bottom: 8px;
     border-bottom: 1px solid #929292;
 
-    strong {
-      font-size: 24px;
-      font-weight: 500;
+    > span {
+      display: flex;
+      align-items: center;
+
+      strong {
+        font-size: 24px;
+        font-weight: 500;
+        margin-right: 8px;
+      }
     }
 
     aside {
@@ -160,26 +166,23 @@ export const GroupSchedules = styled.div`
   width: 100%;
   margin-top: 16px;
   justify-content: space-between;
+`;
 
-  > main {
-  }
+export const GroupScheduleActions = styled.aside`
+  display: flex;
+  flex-direction: column;
 
-  > aside {
-    display: flex;
-    flex-direction: column;
+  svg {
+    opacity: 0.6;
+    transition: 0.2s;
 
-    svg {
-      opacity: 0.6;
-      transition: 0.2s;
+    &:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
 
-      &:hover {
-        opacity: 1;
-        transform: scale(1.1);
-      }
-
-      & + svg {
-        margin-top: 8px;
-      }
+    & + svg {
+      margin-top: 8px;
     }
   }
 `;
@@ -192,24 +195,35 @@ export const GroupSchedule = styled.section`
     margin-top: 8px;
   }
 
-  > p {
-    color: #4f4f4f;
-    font-size: 16px;
-    font-weight: 500;
-    margin-right: 24px;
+  > span {
+    display: flex;
+    align-items: center;
+    margin-left: -8px;
   }
 
-  > span {
-    background: #005678;
-    border-radius: 16px;
-    padding: 4px 8px;
+  div {
+    display: flex;
+    align-items: center;
 
-    color: #eaeaea;
-    font-size: 16px;
-    font-weight: 500;
+    > p {
+      color: #4f4f4f;
+      font-size: 16px;
+      font-weight: 500;
+      margin-right: 24px;
+    }
 
-    & + span {
-      margin-left: 16px;
+    > span {
+      background: #005678;
+      border-radius: 16px;
+      padding: 4px 8px;
+
+      color: #eaeaea;
+      font-size: 16px;
+      font-weight: 500;
+
+      & + span {
+        margin-left: 16px;
+      }
     }
   }
 `;
