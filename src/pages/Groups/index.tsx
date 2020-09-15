@@ -6,6 +6,7 @@ import { IoIosClose } from 'react-icons/io';
 import { FormHandles } from '@unform/core';
 import { mutate as mutateGlobal } from 'swr';
 
+import { Form } from '@unform/web';
 import {
   Container,
   Content,
@@ -27,6 +28,7 @@ import { useFetch } from '../../hooks/useFetch';
 import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
 import api from '../../services/api';
 import { useToast } from '../../hooks/Toast';
+import InputSchedule from '../../components/InputSchedule';
 
 interface IGroups {
   id: string;
@@ -50,7 +52,7 @@ const Groups: React.FC = () => {
   const [filteredCity, setFilteredCity] = useState('');
   const [selectedCity, setSelectedCity] = useState<IGroups>({} as IGroups);
   const [functionClicked, setFunctionClicked] = useState<
-    'delete' | 'alter' | 'add' | null
+    'delete' | 'alter' | null
   >();
 
   const { data: groupsData, mutate } = useFetch<IGroups[]>('/groups/list', {
@@ -174,7 +176,7 @@ const Groups: React.FC = () => {
   );
 
   const handleSetFunctionClick = useCallback(
-    (action: 'delete' | 'alter' | 'add' | null) => {
+    (action: 'delete' | 'alter' | null) => {
       if (functionClicked !== action) {
         setFunctionClicked(action);
       } else {
@@ -199,6 +201,36 @@ const Groups: React.FC = () => {
     },
     [mutate, groups],
   );
+
+  const handleAddSchedule = useCallback(
+    async (id: string) => {
+      const data = {
+        shift: 'manhã',
+        day: 'segunda',
+        start: '0:00',
+        finish: '0:00',
+        group_id: id,
+      };
+
+      const scheduleAdded = await api.post('schedules', data);
+
+      const updatedGroups = groups.map((group) => {
+        if (group.id === id) {
+          group.schedules.push(scheduleAdded.data);
+        }
+
+        return group;
+      });
+
+      mutate(updatedGroups, true);
+      mutateGlobal('/groups/list', updatedGroups);
+    },
+    [groups, mutate],
+  );
+
+  const handleAlterSchedule = useCallback(() => {
+    console.log('alter');
+  }, []);
 
   return (
     <Container>
@@ -246,6 +278,7 @@ const Groups: React.FC = () => {
           <GroupsList>
             {groups.map((group) => (
               <Group
+                key={group.id}
                 selected={selectedCity.id === group.id}
                 onClick={() => handleSetData(group)}
               >
@@ -274,7 +307,10 @@ const Groups: React.FC = () => {
                 <GroupSchedules>
                   <main>
                     {group.schedules.map((schedule) => (
-                      <GroupSchedule>
+                      <GroupSchedule
+                        onSubmit={handleAlterSchedule}
+                        key={schedule.id}
+                      >
                         {selectedCity.id === group.id &&
                           functionClicked === 'delete' && (
                             <span>
@@ -292,29 +328,39 @@ const Groups: React.FC = () => {
                         <div>
                           <p>{putFirstLetterUperCase(schedule.day)}</p>
 
-                          <span>
-                            {schedule.start} - {schedule.finish}
-                          </span>
+                          <InputSchedule
+                            isDisabled={
+                              !(
+                                selectedCity.id === group.id &&
+                                functionClicked === 'alter'
+                              )
+                            }
+                            name="schedule"
+                            initialValue={{
+                              finish: schedule.finish,
+                              start: schedule.start,
+                            }}
+                          />
                         </div>
                       </GroupSchedule>
                     ))}
                   </main>
 
-                  <GroupScheduleActions>
+                  <GroupScheduleActions action={functionClicked}>
                     <FiEdit2
                       onClick={() => handleSetFunctionClick('alter')}
                       color="#219653"
-                      name="alter"
+                      className="alter"
                     />
                     <FiTrash
                       onClick={() => handleSetFunctionClick('delete')}
                       color="#EB5757"
-                      name="delete"
+                      className="delete"
                     />
                     <FiPlus
-                      onClick={() => handleSetFunctionClick('add')}
+                      onClick={() => handleAddSchedule(group.id)}
                       color="#F2994A"
-                      name="add"
+                      className="add"
                     />
                   </GroupScheduleActions>
                 </GroupSchedules>

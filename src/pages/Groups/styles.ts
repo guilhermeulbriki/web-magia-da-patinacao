@@ -5,6 +5,10 @@ interface IGroupsProps {
   selected: boolean;
 }
 
+interface IGroupScheduleActionsProps {
+  action: 'alter' | 'delete' | null | undefined;
+}
+
 export const Container = styled.div`
   width: 100%;
   display: flex;
@@ -168,13 +172,31 @@ export const GroupSchedules = styled.div`
   justify-content: space-between;
 `;
 
-export const GroupScheduleActions = styled.aside`
+export const GroupScheduleActions = styled.aside<IGroupScheduleActionsProps>`
   display: flex;
   flex-direction: column;
 
   svg {
     opacity: 0.6;
     transition: 0.2s;
+
+    &.alter {
+      ${(props) =>
+        props.action === 'alter' &&
+        css`
+          opacity: 1;
+          transform: scale(1.1);
+        `}
+    }
+
+    &.delete {
+      ${(props) =>
+        props.action === 'delete' &&
+        css`
+          opacity: 1;
+          transform: scale(1.1);
+        `}
+    }
 
     &:hover {
       opacity: 1;
@@ -187,11 +209,11 @@ export const GroupScheduleActions = styled.aside`
   }
 `;
 
-export const GroupSchedule = styled.section`
+export const GroupSchedule = styled(Form)`
   display: flex;
   align-items: center;
 
-  & + section {
+  & + form {
     margin-top: 8px;
   }
 
@@ -210,20 +232,6 @@ export const GroupSchedule = styled.section`
       font-size: 16px;
       font-weight: 500;
       margin-right: 24px;
-    }
-
-    > span {
-      background: #005678;
-      border-radius: 16px;
-      padding: 4px 8px;
-
-      color: #eaeaea;
-      font-size: 16px;
-      font-weight: 500;
-
-      & + span {
-        margin-left: 16px;
-      }
     }
   }
 `;

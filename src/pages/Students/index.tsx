@@ -292,7 +292,9 @@ const Students: React.FC = () => {
             <section>
               <strong>Turma</strong>
               {students.map((student) => (
-                <span key={`${student.id}group`}>{student.group.name}</span>
+                <span key={`${student.id}group`}>
+                  {student.group ? student.group.name : '-'}
+                </span>
               ))}
             </section>
             <section>
