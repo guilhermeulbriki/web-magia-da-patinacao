@@ -1,5 +1,9 @@
-import styled, { keyframes } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 import { Form } from '@unform/web';
+
+interface IGroupsProps {
+  selected: boolean;
+}
 
 export const Container = styled.div`
   width: 100%;
@@ -99,7 +103,7 @@ export const GroupsList = styled.main`
   margin-top: 24px;
 `;
 
-export const Group = styled.article`
+export const Group = styled.article<IGroupsProps>`
   background: #f9f9f9;
   padding: 16px;
   width: 100%;
@@ -113,8 +117,14 @@ export const Group = styled.article`
   }
 
   &:hover {
-    box-shadow: 0px 0px 10px #ccc;
+    box-shadow: 0px 0px 3px #005678;
   }
+
+  ${(props) =>
+    props.selected &&
+    css`
+      box-shadow: 0px 0px 6px #005678;
+    `}
 
   > header {
     display: flex;

@@ -114,7 +114,7 @@ const Enrollments: React.FC = () => {
       groupsData.forEach((group: StudentsAgeDTO) => {
         formatedData.push({
           label: group.name,
-          students: group.students.length > 0 ? group.students.length : 1,
+          students: group.students.length,
         });
       });
 

@@ -1,7 +1,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { FiEdit2, FiPlus, FiTrash } from 'react-icons/fi';
+import { FormHandles } from '@unform/core';
+import { mutate as mutateGlobal } from 'swr';
 
 import {
   Container,
@@ -22,6 +24,7 @@ import Button from '../../components/Button';
 import { useFetch } from '../../hooks/useFetch';
 import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
 import api from '../../services/api';
+import { useToast } from '../../hooks/Toast';
 
 interface IGroups {
   id: string;
@@ -38,10 +41,14 @@ interface IGroups {
 }
 
 const Groups: React.FC = () => {
+  const formAddRef = useRef<FormHandles>(null);
+  const formUpdateRef = useRef<FormHandles>(null);
+  const { addToast } = useToast();
   const [groups, setGroups] = useState<IGroups[]>([]);
-  const [selectedCity, setSelectedCity] = useState('');
+  const [filteredCity, setFilteredCity] = useState('');
+  const [selectedCity, setSelectedCity] = useState<IGroups>({} as IGroups);
 
-  const { data: groupsData } = useFetch<IGroups[]>('/groups/list', {
+  const { data: groupsData, mutate } = useFetch<IGroups[]>('/groups/list', {
     params: { city: '' },
   });
 
@@ -54,23 +61,98 @@ const Groups: React.FC = () => {
   useEffect(() => {
     api
       .get('/groups/list', {
-        params: { city: selectedCity },
+        params: { city: filteredCity },
       })
       .then((response) => setGroups(response.data));
-  }, [selectedCity]);
+  }, [filteredCity]);
 
   const handleSelectCity = useCallback(
     (city: string) => {
-      const alreadySelected = selectedCity === city;
+      const alreadySelected = filteredCity === city;
 
       if (alreadySelected) {
-        setSelectedCity('');
+        setFilteredCity('');
       } else {
-        setSelectedCity(city);
+        setFilteredCity(city);
       }
     },
-    [selectedCity],
+    [filteredCity],
   );
+
+  const handleAddGroup = useCallback(
+    async (data) => {
+      try {
+        const groupAdded = await api.post<IGroups>('groups', data);
+
+        const updatedGroups = [...groups, groupAdded.data];
+
+        mutate(updatedGroups, true);
+        mutateGlobal('/groups/list', updatedGroups);
+
+        addToast({
+          type: 'success',
+          title: 'Turma adicionada',
+          description: 'A turma foi adicionada com sucesso',
+        });
+      } catch (err) {
+        let description = 'Ocorreu um erro ao adicionar a turma';
+
+        if (err) description = err.response.data.message;
+
+        addToast({
+          type: 'error',
+          title: 'Erro ao adicionar a turma',
+          description,
+        });
+      }
+    },
+    [addToast, groups, mutate],
+  );
+
+  const handleUpdateGroup = useCallback(
+    async (data) => {
+      try {
+        const groupUpdated = await api.put<IGroups>('groups', data, {
+          params: { id: selectedCity.id },
+        });
+
+        const updatedGroups = groups.map((group) => {
+          if (group.id === groupUpdated.data.id) {
+            return groupUpdated.data;
+          }
+
+          return group;
+        });
+
+        mutate(updatedGroups, true);
+        mutateGlobal('/groups/list', updatedGroups);
+
+        formUpdateRef.current?.reset();
+
+        addToast({
+          type: 'success',
+          title: 'Turma alterada',
+          description: 'A turma foi alterada com sucesso',
+        });
+      } catch (err) {
+        let description = 'Ocorreu um erro ao alterar a turma';
+
+        if (err) description = err.response.data.message;
+
+        addToast({
+          type: 'error',
+          title: 'Erro ao alterar a turma',
+          description,
+        });
+      }
+    },
+    [addToast, groups, mutate, selectedCity.id],
+  );
+
+  const handleSetData = useCallback((data: IGroups) => {
+    formUpdateRef.current?.setData(data);
+    setSelectedCity(data);
+  }, []);
 
   return (
     <Container>
@@ -88,27 +170,27 @@ const Groups: React.FC = () => {
 
           <GroupsListCities>
             <span
-              className={selectedCity === 'seberi' ? 'active' : ''}
+              className={filteredCity === 'seberi' ? 'active' : ''}
               onClick={() => handleSelectCity('seberi')}
             >
               Seberi
             </span>
             <span
               className={
-                selectedCity === 'frederico westphalen' ? 'active' : ''
+                filteredCity === 'frederico westphalen' ? 'active' : ''
               }
               onClick={() => handleSelectCity('frederico westphalen')}
             >
               Frederico Westphalen
             </span>
             <span
-              className={selectedCity === 'palmitinho' ? 'active' : ''}
+              className={filteredCity === 'palmitinho' ? 'active' : ''}
               onClick={() => handleSelectCity('palmitinho')}
             >
               Palmitinho
             </span>
             <span
-              className={selectedCity === 'taquaruçu do sul' ? 'active' : ''}
+              className={filteredCity === 'taquaruçu do sul' ? 'active' : ''}
               onClick={() => handleSelectCity('taquaruçu do sul')}
             >
               Taquaruçu do Sul
@@ -117,7 +199,10 @@ const Groups: React.FC = () => {
 
           <GroupsList>
             {groups.map((group) => (
-              <Group>
+              <Group
+                selected={selectedCity.name === group.name}
+                onClick={() => handleSetData(group)}
+              >
                 <header>
                   <strong>{putFirstLetterUperCase(group.name)}</strong>
 
@@ -156,7 +241,7 @@ const Groups: React.FC = () => {
         </GroupsContent>
 
         <GroupsEdit>
-          <AddGroup onSubmit={() => {}}>
+          <AddGroup ref={formAddRef} onSubmit={handleAddGroup}>
             <strong>Adicionar nova turma</strong>
 
             <div>
@@ -169,11 +254,16 @@ const Groups: React.FC = () => {
             </div>
 
             <Input name="city" placeholder="Cidade" />
+            <Input name="instructor" placeholder="Professor(a)" />
 
             <Button type="submit">Adicionar</Button>
           </AddGroup>
 
-          <UpdateGroup onSubmit={() => {}}>
+          <UpdateGroup
+            initialData={selectedCity}
+            ref={formUpdateRef}
+            onSubmit={handleUpdateGroup}
+          >
             <strong>Alterar uma turma</strong>
 
             <div>
@@ -182,6 +272,7 @@ const Groups: React.FC = () => {
             </div>
 
             <Input name="city" placeholder="Cidade" />
+            <Input name="instructor" placeholder="Professor(a)" />
 
             <Button type="submit">Alterar</Button>
           </UpdateGroup>
