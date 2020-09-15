@@ -217,6 +217,13 @@ export const GroupSchedule = styled(Form)`
     margin-top: 8px;
   }
 
+  > button {
+    border: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+  }
+
   > span {
     display: flex;
     align-items: center;
@@ -226,13 +233,6 @@ export const GroupSchedule = styled(Form)`
   div {
     display: flex;
     align-items: center;
-
-    > p {
-      color: #4f4f4f;
-      font-size: 16px;
-      font-weight: 500;
-      margin-right: 24px;
-    }
   }
 `;
 

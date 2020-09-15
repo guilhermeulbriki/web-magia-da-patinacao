@@ -2,11 +2,10 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { FiEdit2, FiPlus, FiTrash } from 'react-icons/fi';
-import { IoIosClose } from 'react-icons/io';
+import { IoIosClose, IoIosCheckmark } from 'react-icons/io';
 import { FormHandles } from '@unform/core';
 import { mutate as mutateGlobal } from 'swr';
 
-import { Form } from '@unform/web';
 import {
   Container,
   Content,
@@ -29,6 +28,7 @@ import putFirstLetterUperCase from '../../utils/putFirstLetterUperCase';
 import api from '../../services/api';
 import { useToast } from '../../hooks/Toast';
 import InputSchedule from '../../components/InputSchedule';
+import Select from '../../components/Select';
 
 interface IGroups {
   id: string;
@@ -48,9 +48,11 @@ const Groups: React.FC = () => {
   const formAddRef = useRef<FormHandles>(null);
   const formUpdateRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
+  const [selectedDay, setSelectedDay] = useState('');
+  const [selectedShcedule, setSelectedShcedule] = useState('');
   const [groups, setGroups] = useState<IGroups[]>([]);
   const [filteredCity, setFilteredCity] = useState('');
-  const [selectedCity, setSelectedCity] = useState<IGroups>({} as IGroups);
+  const [selectedGroup, setSelectedCity] = useState<IGroups>({} as IGroups);
   const [functionClicked, setFunctionClicked] = useState<
     'delete' | 'alter' | null
   >();
@@ -120,7 +122,7 @@ const Groups: React.FC = () => {
     async (data) => {
       try {
         const groupUpdated = await api.put<IGroups>('groups', data, {
-          params: { id: selectedCity.id },
+          params: { id: selectedGroup.id },
         });
 
         const updatedGroups = groups.map((group) => {
@@ -153,7 +155,7 @@ const Groups: React.FC = () => {
         });
       }
     },
-    [addToast, groups, mutate, selectedCity.id],
+    [addToast, groups, mutate, selectedGroup.id],
   );
 
   const handleSetData = useCallback((data: IGroups) => {
@@ -167,12 +169,12 @@ const Groups: React.FC = () => {
 
       const updatedGroups = groups.filter((group) => group.id === id);
 
-      if (selectedCity.id === id) formUpdateRef.current?.reset();
+      if (selectedGroup.id === id) formUpdateRef.current?.reset();
 
       mutate(updatedGroups, true);
       mutateGlobal('/groups/list', updatedGroups);
     },
-    [groups, mutate, selectedCity.id],
+    [groups, mutate, selectedGroup.id],
   );
 
   const handleSetFunctionClick = useCallback(
@@ -228,8 +230,69 @@ const Groups: React.FC = () => {
     [groups, mutate],
   );
 
-  const handleAlterSchedule = useCallback(() => {
-    console.log('alter');
+  const handleAlterSchedule = useCallback(
+    async (data) => {
+      const [getSchedule] = selectedGroup.schedules.filter(
+        (schedule) => schedule.id === selectedShcedule,
+      );
+
+      const day = selectedDay.length < 1 ? getSchedule.day : selectedDay;
+
+      const formatedData = {
+        group_id: selectedGroup.id,
+        day,
+        start: data.start,
+        finish: data.finish,
+        shift: 'Manhã',
+      };
+
+      try {
+        const updatedSchedule = await api.put(
+          `schedules/${selectedShcedule}`,
+          formatedData,
+        );
+
+        const updatedGroups = groups.map((group) => {
+          group.schedules.map((schedule) => {
+            if (schedule.id === selectedShcedule) {
+              return updatedSchedule.data;
+            }
+
+            return schedule;
+          });
+
+          return group;
+        });
+
+        mutate(updatedGroups, true);
+        mutateGlobal('/groups/list', updatedGroups);
+
+        setFunctionClicked(null);
+      } catch (err) {
+        let description = 'Ocorreu um erro ao alterar o horário';
+
+        if (err) description = err.response.data.message;
+
+        addToast({
+          type: 'error',
+          title: 'Erro ao alterar o horário',
+          description,
+        });
+      }
+    },
+    [
+      selectedGroup.schedules,
+      selectedGroup.id,
+      selectedDay,
+      selectedShcedule,
+      groups,
+      mutate,
+      addToast,
+    ],
+  );
+
+  const handleAlterScheduleDay = useCallback((value: string) => {
+    setSelectedDay(value);
   }, []);
 
   return (
@@ -279,13 +342,13 @@ const Groups: React.FC = () => {
             {groups.map((group) => (
               <Group
                 key={group.id}
-                selected={selectedCity.id === group.id}
+                selected={selectedGroup.id === group.id}
                 onClick={() => handleSetData(group)}
               >
                 <header>
                   <span>
                     <strong>{putFirstLetterUperCase(group.name)}</strong>
-                    {selectedCity.id === group.id &&
+                    {selectedGroup.id === group.id &&
                       functionClicked === 'delete' && (
                         <FiTrash
                           color="#EB5757"
@@ -311,7 +374,7 @@ const Groups: React.FC = () => {
                         onSubmit={handleAlterSchedule}
                         key={schedule.id}
                       >
-                        {selectedCity.id === group.id &&
+                        {selectedGroup.id === group.id &&
                           functionClicked === 'delete' && (
                             <span>
                               <IoIosClose
@@ -325,13 +388,55 @@ const Groups: React.FC = () => {
                             </span>
                           )}
 
+                        {selectedGroup.id === group.id &&
+                          functionClicked === 'alter' && (
+                            <button
+                              onClick={() => setSelectedShcedule(schedule.id)}
+                              type="submit"
+                            >
+                              <IoIosCheckmark color="#00A3E4" size={24} />
+                            </button>
+                          )}
+
                         <div>
-                          <p>{putFirstLetterUperCase(schedule.day)}</p>
+                          <Select
+                            handleSelect={handleAlterScheduleDay}
+                            disabled={
+                              !(
+                                selectedGroup.id === group.id &&
+                                functionClicked === 'alter'
+                              )
+                            }
+                            defaultValue={schedule.day}
+                            name="dayShcedule"
+                            options={[
+                              {
+                                label: 'Segunda',
+                                value: 'segunda',
+                              },
+                              {
+                                label: 'Terça',
+                                value: 'terça',
+                              },
+                              {
+                                label: 'Quarta',
+                                value: 'quarta',
+                              },
+                              {
+                                label: 'Quinta',
+                                value: 'quinta',
+                              },
+                              {
+                                label: 'Sexta',
+                                value: 'sexta',
+                              },
+                            ]}
+                          />
 
                           <InputSchedule
                             isDisabled={
                               !(
-                                selectedCity.id === group.id &&
+                                selectedGroup.id === group.id &&
                                 functionClicked === 'alter'
                               )
                             }
@@ -389,7 +494,7 @@ const Groups: React.FC = () => {
           </AddGroup>
 
           <UpdateGroup
-            initialData={selectedCity}
+            initialData={selectedGroup}
             ref={formUpdateRef}
             onSubmit={handleUpdateGroup}
           >

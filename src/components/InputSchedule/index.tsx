@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes, useRef } from 'react';
+import React, { InputHTMLAttributes, useEffect, useRef } from 'react';
+import { useField } from '@unform/core';
 
 import { Container } from './styles';
 
@@ -17,7 +18,28 @@ const InputSchedule: React.FC<InputProps> = ({
   initialValue,
   isDisabled,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const startRef = useRef<HTMLInputElement>(null);
+  const finishRef = useRef<HTMLInputElement>(null);
+  const { fieldName: fieldStart, registerField: registerStart } = useField(
+    'start',
+  );
+  const { fieldName: fieldFinish, registerField: registerFinish } = useField(
+    'finish',
+  );
+
+  useEffect(() => {
+    registerStart({
+      name: fieldStart,
+      ref: startRef.current,
+      path: 'value',
+    });
+
+    registerFinish({
+      name: fieldFinish,
+      ref: finishRef.current,
+      path: 'value',
+    });
+  }, [fieldStart, fieldFinish, registerStart, registerFinish]);
 
   return (
     <Container style={containerStyle}>
@@ -25,14 +47,14 @@ const InputSchedule: React.FC<InputProps> = ({
         name="start"
         disabled={isDisabled}
         defaultValue={initialValue.start}
-        ref={inputRef}
+        ref={startRef}
       />
       <span>-</span>
       <input
         name="finish"
         disabled={isDisabled}
         defaultValue={initialValue.finish}
-        ref={inputRef}
+        ref={finishRef}
       />
     </Container>
   );
