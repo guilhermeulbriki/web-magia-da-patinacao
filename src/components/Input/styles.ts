@@ -50,6 +50,7 @@ export const Container = styled.div<ContainerProps>`
     background: transparent;
     border: 0;
     color: #4F4F4F;
+    font-size: 16px;
 
     &::placeholder {
       color: #929292;
