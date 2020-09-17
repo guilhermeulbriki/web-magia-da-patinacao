@@ -28,11 +28,6 @@ export const Table = styled.main`
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    strong {
-      font-size: 16px;
-      font-weight: 500;
-    }
   }
 `;
 
@@ -92,12 +87,20 @@ export const TableRow = styled.span`
   min-height: 24px;
   color: #4f4f4f;
 
-  & + span {
-    margin-top: 4px;
+  svg {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+
+    & + svg {
+      margin-left: 8px;
+    }
   }
 
-  svg + svg {
-    margin-left: 8px;
+  & + span {
+    margin-top: 4px;
   }
 `;
 
