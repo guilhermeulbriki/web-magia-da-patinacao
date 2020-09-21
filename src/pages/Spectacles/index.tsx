@@ -34,7 +34,9 @@ interface ISpectacle {
 const Spectacles: React.FC = () => {
   const [spectacles, setSpectacles] = useState<ISpectacle[]>([]);
 
-  const { data } = useFetch<ISpectacle[]>('/spectacles');
+  const { data } = useFetch<ISpectacle[]>('/spectacles', {
+    params: { order: 'DESC' },
+  });
 
   useEffect(() => {
     if (data) setSpectacles(data);

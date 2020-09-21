@@ -14,7 +14,6 @@ export const Container = styled.div<ContainerProps>`
   padding: 16px;
   width: 100%;
   min-width: 159px;
-  max-width: 240px;
 
   box-shadow: 5px 4px 10px rgba(22, 33, 39, 0.25);
   color: #929292;

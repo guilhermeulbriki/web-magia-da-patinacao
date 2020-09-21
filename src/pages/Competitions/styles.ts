@@ -28,6 +28,23 @@ export const Table = styled.main`
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    > div {
+      display: flex;
+      align-items: center;
+
+      > strong {
+        margin-right: 16px;
+      }
+
+      img {
+        height: 30px;
+
+        & + img {
+          margin-left: 8px;
+        }
+      }
+    }
   }
 `;
 

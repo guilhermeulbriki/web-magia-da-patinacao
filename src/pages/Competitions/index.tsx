@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   FiSettings,
@@ -7,8 +9,15 @@ import {
   FiArrowRight,
 } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
-
 import { format } from 'date-fns';
+
+import SideMenu from '../../components/SideMenu';
+import Input from '../../components/Input';
+import Button from '../../components/Button';
+import { useFetch } from '../../hooks/useFetch';
+import api from '../../services/api';
+import { useToast } from '../../hooks/Toast';
+import SelectInput from '../../components/SelectInput';
 import {
   Container,
   Content,
@@ -20,13 +29,12 @@ import {
   AddEdition,
   AlterEdition,
 } from './styles';
-import SideMenu from '../../components/SideMenu';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import { useFetch } from '../../hooks/useFetch';
-import api from '../../services/api';
-import { useToast } from '../../hooks/Toast';
-import SelectInput from '../../components/SelectInput';
+
+import primeiro from '../../assets/awards/primeiro.png';
+import segundo from '../../assets/awards/segundo.png';
+import terceiro from '../../assets/awards/terceiro.png';
+import quarto from '../../assets/awards/quarto.png';
+import quinto from '../../assets/awards/quinto.png';
 
 interface ICompetition {
   id: string;
@@ -43,6 +51,7 @@ const Competitions: React.FC = () => {
   const formUpdateRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
   const [page, setPage] = useState(1);
+  const [award, setAward] = useState<number | null>();
   const [competitions, setCompetitions] = useState<ICompetition[]>([]);
   const [selectedAward, setSelectedAward] = useState('');
   const [selectedUpdateAward, setSelectedUpdateAward] = useState('');
@@ -59,9 +68,22 @@ const Competitions: React.FC = () => {
 
   useEffect(() => {
     api
-      .get('competitions', { params: { page } })
+      .get('competitions', { params: { page, award } })
       .then((response) => setCompetitions(response.data));
-  }, [page]);
+  }, [page, award]);
+
+  const handleFilterAward = useCallback(
+    (awardInputed: number) => {
+      const alreadySelected = award === awardInputed;
+
+      if (alreadySelected) {
+        setAward(null);
+      } else {
+        setAward(awardInputed);
+      }
+    },
+    [award],
+  );
 
   const handleSelectAward = useCallback((value) => {
     setSelectedAward(value);
@@ -208,7 +230,42 @@ const Competitions: React.FC = () => {
       <Content>
         <Table>
           <header>
-            <strong>Competições</strong>
+            <div>
+              <strong>Competições</strong>
+
+              <span>
+                <img
+                  onClick={() => handleFilterAward(1)}
+                  style={{ opacity: award === 1 ? 1 : 0.6 }}
+                  src={primeiro}
+                  alt="Troféu"
+                />
+                <img
+                  onClick={() => handleFilterAward(2)}
+                  style={{ opacity: award === 2 ? 1 : 0.6 }}
+                  src={segundo}
+                  alt="Troféu"
+                />
+                <img
+                  onClick={() => handleFilterAward(3)}
+                  style={{ opacity: award === 3 ? 1 : 0.6 }}
+                  src={terceiro}
+                  alt="Troféu"
+                />
+                <img
+                  onClick={() => handleFilterAward(4)}
+                  style={{ opacity: award === 4 ? 1 : 0.6 }}
+                  src={quarto}
+                  alt="Troféu"
+                />
+                <img
+                  onClick={() => handleFilterAward(5)}
+                  style={{ opacity: award === 5 ? 1 : 0.6 }}
+                  src={quinto}
+                  alt="Troféu"
+                />
+              </span>
+            </div>
 
             <TablePagination>
               <FiArrowLeft
