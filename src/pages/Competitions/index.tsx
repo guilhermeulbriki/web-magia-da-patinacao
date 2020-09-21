@@ -7,7 +7,6 @@ import {
   FiArrowRight,
 } from 'react-icons/fi';
 import { FormHandles } from '@unform/core';
-import { mutate as mutateGlobal } from 'swr';
 
 import { format } from 'date-fns';
 import {
@@ -50,7 +49,7 @@ const Competitions: React.FC = () => {
   const [selectedCompetition, setSelectedCompetition] = useState(0);
   const [defaultValue, setDefaultValue] = useState('0');
 
-  const { data, mutate } = useFetch<ICompetition[]>('/competitions', {
+  const { data } = useFetch<ICompetition[]>('/competitions', {
     params: { page },
   });
 
@@ -88,8 +87,9 @@ const Competitions: React.FC = () => {
 
         const updatedCompetitions = [...competitions, competitionAdded.data];
 
-        mutate(updatedCompetitions, true);
-        mutateGlobal('/competitions', updatedCompetitions);
+        updatedCompetitions.slice(0, page * 20);
+
+        setCompetitions(updatedCompetitions);
 
         addToast({
           type: 'success',
@@ -110,7 +110,7 @@ const Competitions: React.FC = () => {
         });
       }
     },
-    [addToast, competitions, mutate, selectedAward],
+    [addToast, competitions, page, selectedAward],
   );
 
   const handleSetUpdate = useCallback(
@@ -181,14 +181,7 @@ const Competitions: React.FC = () => {
         });
       }
     },
-    [
-      addToast,
-      competitions,
-      mutate,
-      page,
-      selectedCompetition,
-      selectedUpdateAward,
-    ],
+    [addToast, competitions, page, selectedCompetition, selectedUpdateAward],
   );
 
   const handleDeleteCompetition = useCallback(
@@ -198,13 +191,14 @@ const Competitions: React.FC = () => {
       await api.delete(`competitions/${competitionWillDeleted.id}`);
 
       const updatedCompetitions = competitions.filter(
-        (competition) => competition.id === competitionWillDeleted.id,
+        (competition) => competition.id !== competitionWillDeleted.id,
       );
 
-      mutate(updatedCompetitions, true);
-      mutateGlobal('/competitions', updatedCompetitions);
+      updatedCompetitions.slice(0, (page - 1) * 20);
+
+      setCompetitions(updatedCompetitions);
     },
-    [competitions, mutate],
+    [competitions, page],
   );
 
   return (
@@ -220,10 +214,12 @@ const Competitions: React.FC = () => {
               <FiArrowLeft
                 size={16}
                 color="#4f4f4f"
-                onClick={() =>
-                  setPage((oldValue) =>
-                    oldValue > 1 ? oldValue - 1 : oldValue,
-                  )
+                onClick={
+                  () =>
+                    setPage((oldValue) =>
+                      oldValue > 1 ? oldValue - 1 : oldValue,
+                    )
+                  // eslint-disable-next-line react/jsx-curly-newline
                 }
               />
               <span>

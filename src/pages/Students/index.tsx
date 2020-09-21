@@ -1,8 +1,9 @@
 /* eslint-disable react/jsx-curly-newline */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ResponsivePie } from '@nivo/pie';
 import { ResponsiveBar } from '@nivo/bar';
 import { BounceLoader } from 'react-spinners';
+import { mutate as mutateGlobal } from 'swr';
 
 import {
   FiArrowLeft,
@@ -26,8 +27,10 @@ import {
 import SideMenu from '../../components/SideMenu';
 import { useFetch } from '../../hooks/useFetch';
 import api from '../../services/api';
+import Select from '../../components/Select';
 
 interface StudentsAgeDTO {
+  id: string;
   age: number;
   name: string;
   students: [];
@@ -39,8 +42,9 @@ interface IDataGraphAges {
 }
 
 interface IGroups {
-  label: string;
-  students: number;
+  id: string;
+  name: string;
+  students: IStudents[];
 }
 
 interface IStudents {
@@ -66,10 +70,11 @@ const Students: React.FC = () => {
   const [groups, setGroups] = useState<IGroups[]>([]);
   const [students, setStudents] = useState<IStudents[]>([]);
   const [filterStudentName, setFilterStudentName] = useState('');
+  const [studentChangeGroup, setStudentChangeGroup] = useState('');
   const [page, setPage] = useState(1);
 
   const { data: studentsAgeData } = useFetch<StudentsAgeDTO[]>('/studentsAges');
-  const { data: groupsData } = useFetch<StudentsAgeDTO[]>('/groups/list', {
+  const { data: groupsData, mutate } = useFetch<IGroups[]>('/groups/list', {
     params: { city: '' },
   });
   const { data: studentsData } = useFetch<IStudents[]>(`students/${page}`, {
@@ -106,17 +111,19 @@ const Students: React.FC = () => {
   }, [studentsAgeData]);
 
   useEffect(() => {
-    const formatedData: IGroups[] = [];
+    // const formatedData: IGroups[] = [];
+
+    // if (groupsData) {
+    //   groupsData.forEach((group: StudentsAgeDTO) => {
+    //     formatedData.push({
+    //       id: group.id,
+    //       label: group.name,
+    //       students: group.students.length > 0 ? group.students.length : 0.1,
+    //     });
+    //   });
 
     if (groupsData) {
-      groupsData.forEach((group: StudentsAgeDTO) => {
-        formatedData.push({
-          label: group.name,
-          students: group.students.length > 0 ? group.students.length : 0.1,
-        });
-      });
-
-      setGroups(formatedData);
+      setGroups(groupsData);
     }
   }, [groupsData]);
 
@@ -136,6 +143,46 @@ const Students: React.FC = () => {
       })
       .then((response) => setStudents(response.data));
   }, [filterStudentName, page]);
+
+  const handleDeleteStudent = useCallback(
+    async (id: string) => {
+      await api.delete('students', { params: { id } });
+
+      const updatedStudents = students.filter((student) => student.id !== id);
+
+      updatedStudents.slice(0, page * 20);
+
+      setStudents(updatedStudents);
+    },
+    [page, students],
+  );
+
+  const handleChangeGroup = useCallback(
+    async (groupSelected: string) => {
+      const groupFinded = groups.find((group) => group.name === groupSelected);
+
+      if (groupFinded) {
+        const studentUpdated = await api.patch<IStudents>('students', null, {
+          params: { id: studentChangeGroup, group_id: groupFinded.id },
+        });
+
+        const groupsUpdated = groups.map((group) => {
+          if (group.id === groupFinded.id) {
+            return {
+              ...group,
+              students: [...group.students, studentUpdated.data],
+            };
+          }
+
+          return group;
+        });
+
+        mutate(groupsUpdated, true);
+        mutateGlobal('/groups/list', groupsUpdated);
+      }
+    },
+    [groups, mutate, studentChangeGroup],
+  );
 
   return (
     <Container>
@@ -204,13 +251,13 @@ const Students: React.FC = () => {
 
             <BarGraph>
               <ResponsiveBar
-                data={groups.map(({ label, students: studentsNumber }) => {
+                data={groups.map(({ name, students: studentsGroup }) => {
                   return {
-                    turma: label,
-                    [label]: studentsNumber,
+                    turma: name,
+                    [name]: studentsGroup.length,
                   };
                 })}
-                keys={groups.map((group) => group.label)}
+                keys={groups.map((group) => group.name)}
                 indexBy="turma"
                 enableLabel={false}
                 enableGridY={false}
@@ -293,7 +340,22 @@ const Students: React.FC = () => {
               <strong>Turma</strong>
               {students.map((student) => (
                 <span key={`${student.id}group`}>
-                  {student.group ? student.group.name : '-'}
+                  {student.group ? (
+                    <Select
+                      onFocus={() => setStudentChangeGroup(student.id)}
+                      name="group"
+                      defaultValue={student.group.name}
+                      options={groups.map((group) => {
+                        return {
+                          label: group.name,
+                          value: group.name,
+                        };
+                      })}
+                      handleSelect={handleChangeGroup}
+                    />
+                  ) : (
+                    '-'
+                  )}
                 </span>
               ))}
             </section>
@@ -309,7 +371,11 @@ const Students: React.FC = () => {
               </strong>
               {students.map((student) => (
                 <span key={`${student.id}config`}>
-                  <FiTrash size={18} color="#eb5757" />
+                  <FiTrash
+                    onClick={() => handleDeleteStudent(student.id)}
+                    size={18}
+                    color="#eb5757"
+                  />
                 </span>
               ))}
             </section>

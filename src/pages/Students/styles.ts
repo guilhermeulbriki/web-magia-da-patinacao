@@ -253,6 +253,10 @@ export const StudentTableContent = styled.main`
       &.ok {
         color: #27ae60;
       }
+
+      svg {
+        cursor: pointer;
+      }
     }
   }
 `;

@@ -292,6 +292,10 @@ export const SponsorTableContent = styled.main`
       &.ok {
         color: #27ae60;
       }
+
+      svg {
+        cursor: pointer;
+      }
     }
   }
 `;

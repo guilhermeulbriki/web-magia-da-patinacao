@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-curly-newline */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ResponsivePie } from '@nivo/pie';
 import { BounceLoader } from 'react-spinners';
 import {
@@ -49,17 +49,14 @@ interface StudentsAgeDTO {
   students: [];
 }
 
-interface IStudents {
+interface ISponsor {
   id: string;
   name: string;
-  sponsor: {
-    id: string;
-    name: string;
-    phone: string;
-  };
-  enrollment: {
-    id: string;
-    status: 'ok' | 'pending';
+  phone: string;
+  addressAsJson: {
+    street: string;
+    city: string;
+    number: string;
   };
 }
 
@@ -69,7 +66,7 @@ const Enrollments: React.FC = () => {
   );
   const [groups, setGroups] = useState<IGroups[]>([]);
   const [page, setPage] = useState(1);
-  const [students, setStudents] = useState<IStudents[]>([]);
+  const [sponsors, setSponsors] = useState<ISponsor[]>([]);
   const [filterSponsorName, setFilterSponsorName] = useState('');
 
   const { data: responseEnrollment } = useFetch<Enrollment[]>('/enrollments');
@@ -77,7 +74,7 @@ const Enrollments: React.FC = () => {
   const { data: groupsData } = useFetch<StudentsAgeDTO[]>('/groups/list', {
     params: { city: '' },
   });
-  const { data: studentsData } = useFetch<IStudents[]>(`students/${page}`, {
+  const { data: sponsorsData } = useFetch<ISponsor[]>(`sponsors/${page}`, {
     params: {
       name: '',
       sponsor_name: filterSponsorName,
@@ -123,21 +120,31 @@ const Enrollments: React.FC = () => {
   }, [groupsData]);
 
   useEffect(() => {
-    if (studentsData) setStudents(studentsData);
-  }, [studentsData]);
+    if (sponsorsData) setSponsors(sponsorsData);
+  }, [sponsorsData]);
 
   useEffect(() => {
     api
-      .get(`students/${page}`, {
+      .get(`sponsors/${page}`, {
         params: {
-          name: '',
-          sponsor_name: filterSponsorName,
-          age: '',
-          group: '',
+          name: filterSponsorName,
         },
       })
-      .then((response) => setStudents(response.data));
+      .then((response) => setSponsors(response.data));
   }, [filterSponsorName, page]);
+
+  const handleDeleteSponsor = useCallback(
+    async (id: string) => {
+      await api.delete('sponsor/profile', { params: { id } });
+
+      const updatedSponsors = sponsors.filter((sponsor) => sponsor.id !== id);
+
+      updatedSponsors.slice(0, page * 20);
+
+      setSponsors(updatedSponsors);
+    },
+    [page, sponsors],
+  );
 
   return (
     <Container>
@@ -275,33 +282,30 @@ const Enrollments: React.FC = () => {
 
           <SponsorTableContent>
             <section>
-              <strong>Responsável</strong>
-              {students.map((student) => (
-                <span key={`${student.id}name`}>{student.sponsor.name}</span>
-              ))}
-            </section>
-            <section>
-              <strong>Aluno(a)</strong>
-              {students.map((student) => (
-                <span key={student.id}>{student.name}</span>
+              <strong>Nome</strong>
+              {sponsors.map((sponsor) => (
+                <span key={`${sponsor.id}name`}>{sponsor.name}</span>
               ))}
             </section>
             <section>
               <strong>Telefone</strong>
-              {students.map((student) => (
-                <span key={`${student.id}phone`}>{student.sponsor.phone}</span>
+              {sponsors.map((sponsor) => (
+                <span key={`${sponsor.id}phone`}>{sponsor.phone}</span>
               ))}
             </section>
             <section>
-              <strong>Matrícula</strong>
-              {students.map((student) => (
-                <span
-                  key={student.enrollment.id}
-                  className={student.enrollment.status}
-                >
-                  {student.enrollment.status === 'ok'
-                    ? 'Matriculado(a)'
-                    : 'Pendente'}
+              <strong>Cidade</strong>
+              {sponsors.map((sponsor) => (
+                <span key={`${sponsor.id}city`}>
+                  {sponsor.addressAsJson.city}
+                </span>
+              ))}
+            </section>
+            <section>
+              <strong>Logradouro</strong>
+              {sponsors.map((sponsor) => (
+                <span key={`${sponsor.id}street`}>
+                  {sponsor.addressAsJson.street}
                 </span>
               ))}
             </section>
@@ -309,9 +313,13 @@ const Enrollments: React.FC = () => {
               <strong>
                 <FiSettings />
               </strong>
-              {students.map((student) => (
-                <span key={`${student.id}config`}>
-                  <FiTrash size={18} color="#eb5757" />
+              {sponsors.map((sponsor) => (
+                <span key={`${sponsor.id}config`}>
+                  <FiTrash
+                    onClick={() => handleDeleteSponsor(sponsor.id)}
+                    size={18}
+                    color="#eb5757"
+                  />
                 </span>
               ))}
             </section>

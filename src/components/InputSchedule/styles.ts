@@ -4,6 +4,7 @@ export const Container = styled.div`
   background: #005678;
   border-radius: 16px;
   padding: 4px 8px;
+  margin-left: 24px;
 
   span {
     color: #eaeaea;

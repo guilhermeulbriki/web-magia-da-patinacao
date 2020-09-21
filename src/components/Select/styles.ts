@@ -8,6 +8,5 @@ export const Container = styled.div`
     color: #4f4f4f;
     font-size: 16px;
     font-weight: 500;
-    margin-right: 24px;
   }
 `;
