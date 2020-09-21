@@ -39,6 +39,13 @@ export const Table = styled.main`
 
       img {
         height: 30px;
+        cursor: pointer;
+
+        transition: transform 0.3s;
+
+        &:hover {
+          transform: scale(1.1);
+        }
 
         & + img {
           margin-left: 8px;

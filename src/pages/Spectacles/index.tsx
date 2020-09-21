@@ -124,7 +124,7 @@ const Spectacles: React.FC = () => {
     async (formData) => {
       try {
         const spectacleWillUpdate = spectacles.find(
-          (spectacle) => selectedSpectacle,
+          (spectacle) => spectacle.id === selectedSpectacle,
         );
 
         if (spectacleWillUpdate) {

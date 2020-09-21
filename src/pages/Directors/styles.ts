@@ -34,6 +34,10 @@ export const Table = styled.main`
       font-size: 16px;
       font-weight: 500;
     }
+
+    svg {
+      cursor: pointer;
+    }
   }
 `;
 

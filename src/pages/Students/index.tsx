@@ -380,15 +380,6 @@ const Students: React.FC = () => {
               ))}
             </section>
           </StudentTableContent>
-
-          <footer>
-            <span>
-              Novos alunos(as): <strong>000</strong>
-            </span>
-            <span>
-              Total de alunas(as): <strong>000</strong>
-            </span>
-          </footer>
         </StudentTable>
       </Content>
     </Container>

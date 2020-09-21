@@ -58,6 +58,8 @@ interface ISponsor {
     city: string;
     number: string;
   };
+  created_at: Date;
+  updated_at: Date;
 }
 
 const Enrollments: React.FC = () => {
@@ -67,6 +69,7 @@ const Enrollments: React.FC = () => {
   const [groups, setGroups] = useState<IGroups[]>([]);
   const [page, setPage] = useState(1);
   const [sponsors, setSponsors] = useState<ISponsor[]>([]);
+  const [newSponsors, setNewSponsors] = useState(0);
   const [filterSponsorName, setFilterSponsorName] = useState('');
 
   const { data: responseEnrollment } = useFetch<Enrollment[]>('/enrollments');
@@ -120,7 +123,15 @@ const Enrollments: React.FC = () => {
   }, [groupsData]);
 
   useEffect(() => {
-    if (sponsorsData) setSponsors(sponsorsData);
+    if (sponsorsData) {
+      setSponsors(sponsorsData);
+
+      const result = sponsorsData.filter(
+        (sponsor) => sponsor.created_at === sponsor.updated_at,
+      );
+
+      setNewSponsors(result.length);
+    }
   }, [sponsorsData]);
 
   useEffect(() => {
@@ -324,15 +335,6 @@ const Enrollments: React.FC = () => {
               ))}
             </section>
           </SponsorTableContent>
-
-          <footer>
-            <span>
-              Novos associados: <strong>000</strong>
-            </span>
-            <span>
-              Total de associados: <strong>000</strong>
-            </span>
-          </footer>
         </SponsorTable>
       </Content>
     </Container>
