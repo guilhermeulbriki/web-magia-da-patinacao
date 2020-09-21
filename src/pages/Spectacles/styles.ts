@@ -93,6 +93,10 @@ export const TableRow = styled.span`
   min-height: 24px;
   color: #4f4f4f;
 
+  svg {
+    cursor: pointer;
+  }
+
   & + span {
     margin-top: 4px;
   }

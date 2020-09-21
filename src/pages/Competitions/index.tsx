@@ -55,7 +55,7 @@ const Competitions: React.FC = () => {
   const [competitions, setCompetitions] = useState<ICompetition[]>([]);
   const [selectedAward, setSelectedAward] = useState('');
   const [selectedUpdateAward, setSelectedUpdateAward] = useState('');
-  const [selectedCompetition, setSelectedCompetition] = useState(0);
+  const [selectedCompetition, setSelectedCompetition] = useState('');
   const [defaultValue, setDefaultValue] = useState('0');
 
   const { data } = useFetch<ICompetition[]>('/competitions', {
@@ -136,18 +136,22 @@ const Competitions: React.FC = () => {
   );
 
   const handleSetUpdate = useCallback(
-    (index: number) => {
-      setSelectedCompetition(index);
+    (id: string) => {
+      setSelectedCompetition(id);
 
-      const competition = competitions[index];
+      const findedCompetition = competitions.find(
+        (competition) => competition.id === id,
+      );
 
-      const formatedData = {
-        ...competition,
-        date: format(new Date(competition.date), 'yyyy-MM-dd'),
-      };
+      if (findedCompetition) {
+        const formatedData = {
+          ...findedCompetition,
+          date: format(new Date(findedCompetition.date), 'yyyy-MM-dd'),
+        };
 
-      setDefaultValue(String(formatedData.award));
-      formUpdateRef.current?.setData(formatedData);
+        setDefaultValue(String(formatedData.award));
+        formUpdateRef.current?.setData(formatedData);
+      }
     },
     [competitions],
   );
@@ -155,42 +159,49 @@ const Competitions: React.FC = () => {
   const handleUpdateCompetition = useCallback(
     async (formData) => {
       try {
-        const competitionWillUpdate = competitions[selectedCompetition];
-
-        const formatedData = {
-          ...formData,
-          date: format(new Date(formData.date), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
-          award:
-            selectedUpdateAward.length < 1
-              ? competitionWillUpdate.award
-              : selectedUpdateAward,
-        };
-
-        const competitionUpdated = await api.put<ICompetition>(
-          `competitions/${competitionWillUpdate.id}`,
-          formatedData,
+        const competitionWillUpdate = competitions.find(
+          (competition) => competition.id === selectedCompetition,
         );
 
-        const updatedCompetitions = competitions.map((competition) => {
-          if (competition.id === competitionUpdated.data.id) {
-            return competitionUpdated.data;
-          }
+        if (competitionWillUpdate) {
+          const formatedData = {
+            ...formData,
+            date: format(
+              new Date(formData.date),
+              "yyyy-MM-dd'T'HH:mm:ss.SSSxxx",
+            ),
+            award:
+              selectedUpdateAward.length < 1
+                ? competitionWillUpdate.award
+                : selectedUpdateAward,
+          };
 
-          return competition;
-        });
+          const competitionUpdated = await api.put<ICompetition>(
+            `competitions/${competitionWillUpdate.id}`,
+            formatedData,
+          );
 
-        updatedCompetitions.slice(0, page * 20);
+          const updatedCompetitions = competitions.map((competition) => {
+            if (competition.id === competitionUpdated.data.id) {
+              return competitionUpdated.data;
+            }
 
-        setCompetitions(updatedCompetitions);
+            return competition;
+          });
 
-        formUpdateRef.current?.reset();
-        setSelectedUpdateAward('');
+          updatedCompetitions.slice(0, page * 20);
 
-        addToast({
-          type: 'success',
-          title: 'Competição alterada',
-          description: 'A competição foi alterada com sucesso',
-        });
+          setCompetitions(updatedCompetitions);
+
+          formUpdateRef.current?.reset();
+          setSelectedUpdateAward('');
+
+          addToast({
+            type: 'success',
+            title: 'Competição alterada',
+            description: 'A competição foi alterada com sucesso',
+          });
+        }
       } catch (err) {
         let description = 'Ocorreu um erro ao alterar a competição';
 
@@ -207,13 +218,11 @@ const Competitions: React.FC = () => {
   );
 
   const handleDeleteCompetition = useCallback(
-    async (index: number) => {
-      const competitionWillDeleted = competitions[index];
-
-      await api.delete(`competitions/${competitionWillDeleted.id}`);
+    async (id: string) => {
+      await api.delete(`competitions/${id}`);
 
       const updatedCompetitions = competitions.filter(
-        (competition) => competition.id !== competitionWillDeleted.id,
+        (competition) => competition.id !== id,
       );
 
       updatedCompetitions.slice(0, (page - 1) * 20);
@@ -335,16 +344,16 @@ const Competitions: React.FC = () => {
               <strong>
                 <FiSettings size={18} />
               </strong>
-              {competitions.map((competition, index) => (
+              {competitions.map((competition) => (
                 <TableRow key={`${competition.id}settings`}>
                   <FiEdit2
                     size={14}
-                    onClick={() => handleSetUpdate(index)}
+                    onClick={() => handleSetUpdate(competition.id)}
                     color="#6FCF97"
                   />
                   <FiTrash
                     size={14}
-                    onClick={() => handleDeleteCompetition(index)}
+                    onClick={() => handleDeleteCompetition(competition.id)}
                     color="#EB5757"
                   />
                 </TableRow>
