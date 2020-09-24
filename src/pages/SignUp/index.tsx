@@ -11,6 +11,7 @@ import logo from '../../assets/logo.svg';
 import signUpImage from '../../assets/signup-image.png';
 import getValidationError from '../../utils/getValidationError';
 import api from '../../services/api';
+import { useAuth } from '../../hooks/Auth';
 
 interface SignUpFormData {
   name: string;
@@ -23,6 +24,7 @@ interface SignUpFormData {
 
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
+  const { signIn } = useAuth();
   const { addToast } = useToast();
   const history = useHistory();
 
@@ -67,6 +69,8 @@ const SignUp: React.FC = () => {
 
         history.push('/');
 
+        signIn({ email: data.email, password: data.password });
+
         addToast({
           type: 'success',
           title: 'Cadastro realizado!',
@@ -81,14 +85,18 @@ const SignUp: React.FC = () => {
           return;
         }
 
+        let description = 'Ocorreu um erro ao alterar a competição';
+
+        if (err) description = err.response.data.message;
+
         addToast({
           type: 'error',
           title: 'Erro no cadastro',
-          description: 'Ocorreu um erro ao fazer o cadastro, tente novamente.',
+          description,
         });
       }
     },
-    [addToast, history],
+    [addToast, history, signIn],
   );
 
   return (
