@@ -1,5 +1,5 @@
 import { Form } from '@unform/web';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 export const Container = styled.div`
   width: 100%;
@@ -80,6 +80,16 @@ export const TablePagination = styled.article`
   }
 `;
 
+const tableContentAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  } to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+`;
+
 export const TableContent = styled.div`
   padding: 16px;
   border: 1px solid #dadada;
@@ -88,6 +98,8 @@ export const TableContent = styled.div`
 
   display: flex;
   justify-content: space-between;
+
+  animation: ${tableContentAnimation} 0.8s ease-out;
 
   section {
     display: flex;
@@ -128,9 +140,21 @@ export const TableRow = styled.span`
   }
 `;
 
+const contentEditionsAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  } to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+`;
+
 export const ContentEditions = styled.aside`
   width: 241px;
   margin-left: 16px;
+
+  animation: ${contentEditionsAnimation} 0.8s ease-out;
 `;
 
 export const AddEdition = styled(Form)`

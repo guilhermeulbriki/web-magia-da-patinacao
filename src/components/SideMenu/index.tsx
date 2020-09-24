@@ -97,14 +97,16 @@ const SideMenu: React.FC = () => {
           <img src={pointer} alt="pointer" />
         </div>
 
-        <div className={location.pathname === '/register' ? 'active' : ''}>
-          <Link to="/register">
-            <img src={directors} alt="create-director" />
-            <span>Cadastrar administrador</span>
-          </Link>
+        {admin.name === 'Presidente' && (
+          <div className={location.pathname === '/register' ? 'active' : ''}>
+            <Link to="/register">
+              <img src={directors} alt="create-director" />
+              <span>Cadastrar administrador</span>
+            </Link>
 
-          <img src={pointer} alt="pointer" />
-        </div>
+            <img src={pointer} alt="pointer" />
+          </div>
+        )}
       </Content>
 
       <img src={logo} alt="Magia da Patinação" />
