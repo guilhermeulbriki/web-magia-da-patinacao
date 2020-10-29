@@ -14,6 +14,7 @@ export const Container = styled.div<ContainerProps>`
   padding: 16px;
   width: 100%;
   min-width: 159px;
+  max-width: 294px;
 
   box-shadow: 5px 4px 10px rgba(22, 33, 39, 0.25);
   color: #929292;
@@ -42,7 +43,6 @@ export const Container = styled.div<ContainerProps>`
   input {
     flex: 1;
     width: 100%;
-    max-width: 240px;
 
     ${(props) =>
       props.haveIcon &&

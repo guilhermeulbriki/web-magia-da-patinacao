@@ -140,6 +140,22 @@ export const TableRow = styled.span`
   }
 `;
 
+export const NumberOfCompetitions = styled.div`
+  width: 100%;
+  margin-top: 16px;
+
+  > strong {
+    font-size: 36px;
+    font-weight: 600;
+    color: #00111f;
+  }
+
+  > span {
+    font-size: 14px;
+    color: #4f4f4f;
+  }
+`;
+
 const contentEditionsAnimation = keyframes`
   from {
     opacity: 0;

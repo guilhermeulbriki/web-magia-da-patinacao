@@ -305,7 +305,7 @@ const Groups: React.FC = () => {
             <strong>Turmas</strong>
 
             <span>
-              Total de turmas: <strong>000</strong>
+              Total de turmas: <strong>{groups.length}</strong>
             </span>
           </header>
 
@@ -344,6 +344,7 @@ const Groups: React.FC = () => {
                 key={group.id}
                 selected={selectedGroup.id === group.id}
                 onClick={() => handleSetData(group)}
+                color={group.color}
               >
                 <header>
                   <span>
@@ -502,7 +503,7 @@ const Groups: React.FC = () => {
 
             <div>
               <Input name="name" placeholder="Nome" />
-              <Input name="color" placeholder="Cor" />
+              <Input name="color" type="color" placeholder="Cor" />
             </div>
 
             <Input name="city" placeholder="Cidade" />

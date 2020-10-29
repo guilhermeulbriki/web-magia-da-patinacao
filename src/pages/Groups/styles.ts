@@ -1,8 +1,10 @@
 import styled, { css, keyframes } from 'styled-components';
 import { Form } from '@unform/web';
+import { lighten } from 'polished';
 
 interface IGroupsProps {
   selected: boolean;
+  color: string;
 }
 
 interface IGroupScheduleActionsProps {
@@ -108,7 +110,6 @@ export const GroupsList = styled.main`
 `;
 
 export const Group = styled.article<IGroupsProps>`
-  background: #f9f9f9;
   padding: 16px;
   width: 100%;
   border-radius: 8px;
@@ -120,14 +121,19 @@ export const Group = styled.article<IGroupsProps>`
     margin-top: 24px;
   }
 
-  &:hover {
-    box-shadow: 0px 0px 3px #005678;
-  }
+  ${(props) =>
+    css`
+      background: ${lighten(0.3, props.color)};
+
+      &:hover {
+        box-shadow: 0px 0px 3px ${props.color};
+      }
+    `}
 
   ${(props) =>
     props.selected &&
     css`
-      box-shadow: 0px 0px 6px #005678;
+      box-shadow: 0px 0px 6px ${props.color};
     `}
 
   > header {

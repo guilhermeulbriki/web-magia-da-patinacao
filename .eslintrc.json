@@ -43,6 +43,7 @@
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/camelcase": "off",
     "no-plusplus": "off",
+    "radix": "warn",
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {

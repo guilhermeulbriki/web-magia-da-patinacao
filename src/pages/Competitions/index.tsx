@@ -25,6 +25,7 @@ import {
   TableContent,
   TablePagination,
   TableRow,
+  NumberOfCompetitions,
   ContentEditions,
   AddEdition,
   AlterEdition,
@@ -360,6 +361,12 @@ const Competitions: React.FC = () => {
               ))}
             </section>
           </TableContent>
+
+          <NumberOfCompetitions>
+            <span>
+              Total de competições: <strong>{competitions.length}</strong>
+            </span>
+          </NumberOfCompetitions>
         </Table>
 
         <ContentEditions>

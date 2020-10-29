@@ -15,6 +15,7 @@ import SideMenu from '../../components/SideMenu';
 import { useToast } from '../../hooks/Toast';
 import { useFetch } from '../../hooks/useFetch';
 import api from '../../services/api';
+import formatNumberWithCommas from '../../utils/formatNumberWithCommas';
 import {
   Container,
   Content,
@@ -252,7 +253,7 @@ const Spectacles: React.FC = () => {
               <strong>Publico</strong>
               {spectacles.map((spectacle) => (
                 <TableRow key={`${spectacle.id}public`}>
-                  {spectacle.public}
+                  {formatNumberWithCommas(parseInt(spectacle.public))}
                 </TableRow>
               ))}
             </section>
