@@ -485,7 +485,7 @@ const Groups: React.FC = () => {
                 name="name"
                 placeholder="Nome"
               />
-              <Input name="color" placeholder="Cor" />
+              <Input name="color" type="color" placeholder="Cor" />
             </div>
 
             <Input name="city" placeholder="Cidade" />
